@@ -1,4 +1,4 @@
-#Winter Palace
+﻿#Winter Palace
 *Winter Palace* is an unofficial video game clone of the 2012 bluffing/guessing card game *[Love Letter](https://www.alderac.com/tempest/love-letter/)* by Seji Kanai. If you are familiar with the card game, you will find the mechanics of *Winter Palace* essentially identical to it, as to the best of my knowledge, game mechanics and ideas are not copyrightable. Kanai's original art, however, is, so my version is a complete reskin that ***does not contain any materials copyrighted by anyone but myself***. Consequently, while the original game was set in the Tempest universe, inspired by Western European royal courts, *Winter Palace* is set in St. Petersburg in the first half of the 18th century.
 
 You can download the [Windows installer](https://drive.google.com/open?id=1oHcPQ6AoOIXQUOGxQrMGoR9Ef1nuP0NK) for the game from Google Drive for free. But if you like my game, please consider buying a copy of the original *Love Letter* from your friendly local gaming store. :-)
