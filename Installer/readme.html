@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Winter Palace</title>
+  <meta name="description" content="Winter Palace">
+  <meta name="author" content="Mikhail Aristov">
+</head>
+<body>
+<h1>Winter Palace</h1>
+
+<p><em><a href="https://github.com/MikhailAristov/WinterPalace">Winter Palace</a></em> is an unofficial video game clone of the 2012 bluffing/guessing card game <em><a href="https://www.alderac.com/tempest/love-letter/">Love Letter</a></em> by Seji Kanai. If you are familiar with the card game, you will find the mechanics of <em>Winter Palace</em> essentially identical to it, as to the best of my knowledge, game mechanics and ideas are not copyrightable. Kanai's original art, however, is, so my version is a complete reskin that <strong><em>does not contain any materials copyrighted by anyone but myself</em></strong>. Consequently, while the original game was set in the Tempest universe, inspired by Western European royal courts, <em>Winter Palace</em> is set in St. Petersburg in the first half of the 18th century.</p>
+
+<p>You can download the <a href="https://drive.google.com/open?id=1oHcPQ6AoOIXQUOGxQrMGoR9Ef1nuP0NK">Windows installer</a> for the game from Google Drive for free. But if you like my game, please consider buying a copy of the original <em>Love Letter</em> from your friendly local gaming store. :-)</p>
+
+<h2>Basics</h2>
+
+<p>While <em>Love Letter</em> was a turn-based competitive card game for two to four players, <em>Winter Palace</em> is a single-player video game that aims to simulate a four-player game of <em>Love Letter</em> with three artificially intelligent opponents (in fact, the entire project was essentially my exercise in game AI programming). Your goal is to knock all other players out of the game before the card deck runs empty or, failing that, to have the highest-valued card in your hand when that happens.</p>
+
+<p>At the start of the game, all 16 cards (see below) are shuffled in the deck on the left. Each of the four players draws a card at the start of the round, then a random player takes the first turn. On their turn, the player draws a card from the top of the deck and plays either it, or the one still in their hand face up, resolving its effects (see below). The played card then goes to the discard pile on the right, while the other one remains with the player. The next active player takes their turn the same way, and so on, until only one player remains standing or until one last card remains in the deck.</p>
+
+<p>If all other players are knocked out, the last one standing wins the round. If only one or no cards remain to be drawn from the deck, all remaining players reveal their hands and the one with the highest-valued card takes the round. In the unlikely event of a tie, the player with the higher total value of drawn and discarded cards (which the game keeps track of) wins. The winner gains a victory token, and has the first turn in the next round, which starts automatically. Unlike in the original card game, there is no limit on how many victory tokens can be gained.</p>
+
+<h2>User Interface</h2>
+
+<p>The entire game is played just with the mouse and its left button. During other players' turns, you don't have to do anything at all, just watch and analyze their moves. On your turn, the game will automatically draw a second card for you, after which you must left-click on the one you want to play (if the card is highlighted red, you are forbidden from playing it by the rules!). If the card must be played at another player, you must then click on that player's face-down card. If your card is a Guard, you will be additionally prompted to select the card you think the opponent your target has in their hand. Be careful with your clicks, once you commit to a card, you cannot undo it!</p>
+
+<p>You can quit the game at any time by left-clicking on the big "X" button in the top-right corner of the screen.</p>
+
+<h2>Cards</h2>
+
+<p>Each card in the game has a numeric value from 1 to 8 and a special ability that may or may not target another player. The deck consists of 16 cards in total, so values 1 to 5 appear more than once in it. For history buffs out there, each card in <em>Winter Palace</em> also represents a historical persona of that period and place.</p>
+
+<ol>
+<li><p><strong>Guard</strong> (x5): When you play a Guard against another player and guess the card (value) they have in their hand correctly, they are knocked out of the round; nothing happens if you guess incorrectly.</p>
+
+<p>Portrait: Private Yekimenko of the <a href="https://en.wikipedia.org/wiki/Semyonovsky_Regiment">Semyonovsky Lifeguard Regiment</a>, by <a href="https://en.wikipedia.org/wiki/Gerhardt_Wilhelm_von_Reutern">Gerhardt Wilhelm von Reutern</a> (<a href="https://commons.wikimedia.org/wiki/File:Рядовой_лейб-гвардии_Семёновского_полка_Екименко,_1832_г.jpg">source</a>).</p></li>
+<li><p><strong>Priest</strong> (x2): When you play a Priest against another player, their hand is briefly revealed to you (and only you).</p>
+
+<p>Portrait: Fyodor Yakovlevich Dubyansky, protopriest of the Russian Orthodox Church and personal confessor of Empresses Catherine and Elizabeth, by <a href="https://en.wikipedia.org/wiki/Aleksey_Antropov">Alexey Petrovich Antropov</a> (<a href="https://commons.wikimedia.org/wiki/File:Portrait_of_Father_Fyodor_Dubyansky.jpg">source</a>).</p></li>
+<li><p><strong>Baron</strong> (x2): When you play a Baron against another player, you reveal your hands to each other and the one with the lower-valued card is immediately knocked out; on a tie, nothing happens.</p>
+
+<p>Portrait: <a href="https://en.wikipedia.org/wiki/Peter_Shafirov">Peter Pavlovich Shafirov</a>, diplomat and postmaster general of the Russian Empire, by an unknown artist (<a href="https://commons.wikimedia.org/wiki/File:Shafirov.jpg">source</a>).</p></li>
+<li><p><strong>Freylina</strong> (x2): When you play a Freylina, you are protected from all other card effects until the start of your next turn.</p>
+
+<p>Portrait: Yekaterina Dmitrievna Golitsyna, lady-in-waiting of the Imperial Court of Russia, by <a href="https://en.wikipedia.org/wiki/Louis-Michel_van_Loo">Louis-Michel van Loo</a> (<a href="https://commons.wikimedia.org/wiki/File:Louis-Michel_van_Loo_Princess_Ekaterina_Dmitrievna_Golitsyna.jpg">source</a>).</p></li>
+<li><p><strong>Knyaz</strong> (x2): When you play a Knyaz against another player, they immediately discard their current hand and draw another card from the deck. You may also play the Knyaz against yourself to cycle your hand.</p>
+
+<p>Portrait: <a href="https://en.wikipedia.org/wiki/Alexander_Danilovich_Menshikov">Alexander Danilovich Menshikov</a>, Russian statesman and Emperor Peter's right-hand man, by <a href="https://en.wikipedia.org/wiki/Michiel_van_Musscher">Michiel van Musscher</a> (<a href="https://commons.wikimedia.org/wiki/File:Menshikov_1698_01.jpg">source</a>).</p></li>
+<li><p><strong>Tsar</strong> (x1): When you play the Tsar against another player, you swap hands with them.</p>
+
+<p>Portrait: <a href="https://en.wikipedia.org/wiki/Peter_the_Great">Peter the Great</a> (Peter Alexeyevich Romanov), first Emperor and Autocrat of All Russias, by <a href="https://en.wikipedia.org/wiki/Paul_Delaroche">Paul Delaroche</a> (<a href="https://commons.wikimedia.org/wiki/File:Peter_der-Grosse_1838.jpg">source</a>).</p></li>
+<li><p><strong>Tsaritsa</strong> (x1): You must discard the Tsaritsa if the other card in your hand is the Tsar or a Knyaz.</p>
+
+<p>Portrait: <a href="https://en.wikipedia.org/wiki/Catherine_I_of_Russia">Catherine I</a> (born Marta Samuilovna Skavronskaya), Peter's wife, later the first Empress of Russia, by <a href="https://en.wikipedia.org/wiki/Jean-Marc_Nattier">Jean-Marc Nattier</a> (<a href="https://commons.wikimedia.org/wiki/File:Catherine_I_of_Russia_by_Nattier.jpg">source</a>).</p></li>
+<li><p><strong>Tsarevna</strong> (x1): If you discard the Tsarevna for any reason, you are instantly knocked out of the round.</p>
+
+<p>Portrait: <a href="https://en.wikipedia.org/wiki/Elizabeth_of_Russia">Elizabeth</a> (Yelizaveta Petrovna Romanova), daughter of Peter and Catherine, later Empress and Autocrat of All Russias, by an unknown artist (<a href="https://commons.wikimedia.org/wiki/File:Elizabeth_of_Russia_(Rostov_museum).jpeg">source</a>).</p></li>
+</ol>
+
+<p>If you like my card designs, you can also download them in a <a href="https://drive.google.com/open?id=1shBgYLNqtjkUHKxYrGRBY-0yrPAqrnBN">single ZIP file</a>.</p>
+
+<h2>Difficulties</h2>
+
+<p>Here is where it gets really interesting. The game starts in the "casual" mode, where the opponent AI is just smart enough to avoid the most glaring gameplay mistakes (like accidentally discarding the Tsarevna, or targeting a player protected by a Freylina). This mode is most useful to get your first bearings and to get accustomed to the cards and the interface.</p>
+
+<p>While in the "casual" mode, you can left-click on the big brain symbol in the top-left corner of the screen to go into the "brainy" mode, where the AI plays on the utmost level of ability that I have, so far been able to squeeze out of my understanding of game theory, discrete probabilistic prediction and filtering, and dual utility-based decision-making. If you see the opponents in the "brainy" mode make a stupid move, congratulations: you have made sure that there is no smart move to make in their situation. That, or I am just not as good as I claim to be at game AI programming.</p>
+
+<p>You can return back into the "casual" mode at any time by clicking on the casually-strolling figure in the top-left corner. However, <em>Winter Palace</em> is really meant to be played in the "brainy" mode.</p>
+</body>
+</html>
