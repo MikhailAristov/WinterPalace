@@ -18,7 +18,7 @@ You can quit the game at any time by left-clicking on the big "X" button in the 
 ## Cards
 Each card in the game has a numeric value from 1 to 8 and a special ability that may or may not target another player. The deck consists of 16 cards in total, so values 1 to 5 appear more than once in it. For history buffs out there, each card in *Winter Palace* also represents a historical persona of that period and place.
 
-1. **Guard** (x5): When you play a Guard against another player and guess the card (value) they have in their hand correctly, they are knocked out of the round; nothing happens if you guess incorrectly.
+1. **Guard** (x5): When you play a Guard against another player and guess the card (value) they have in their hand correctly, they are knocked out of the round; nothing happens if you guess incorrectly. You may not guess "Guard", as that would be too easy.
 
  Portrait: Private Yekimenko of the [Semyonovsky Lifeguard Regiment](https://en.wikipedia.org/wiki/Semyonovsky_Regiment), by [Gerhardt Wilhelm von Reutern](https://en.wikipedia.org/wiki/Gerhardt_Wilhelm_von_Reutern) ([source](https://commons.wikimedia.org/wiki/File:Рядовой_лейб-гвардии_Семёновского_полка_Екименко,_1832_г.jpg)).
 
