@@ -96,6 +96,19 @@ public static class AIUtil {
 		return (result / ElementCount);
 	}
 
+	public static float GetAbsoluteExpectedValueError(float[] arr1, float[] arr2) {
+		// Check length
+		if(arr1.Length != arr2.Length) {
+			throw new ArgumentException("Two arrays don't have the same length!");
+		}
+		// Sum up the differences in probabilities, weighted by the value
+		float result = 0;
+		for(int i = 0; i < arr1.Length; i++) {
+			result += (arr1[i] - arr2[i]) * i;
+		}
+		return Mathf.Abs(result);
+	}
+
 	public static void DisplayVector(string preface, float[] input) {
 		int length = input.GetLength(0);
 
