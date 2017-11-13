@@ -48,7 +48,7 @@ Each card in the game has a numeric value from 1 to 8 and a special ability that
 
 8. **Tsarevna** (x1): If you discard the Tsarevna for any reason, you are immediately knocked out of the round.
 
-  Portrait: [Elizabeth](https://en.wikipedia.org/wiki/Elizabeth_of_Russia) (Yelizaveta Petrovna Romanova), daughter of Peter and Catherine, later Empress and Autocrat of All Russias, by an unknown artist ([source](https://commons.wikimedia.org/wiki/File:Elizabeth_of_Russia_(Rostov_museum\).jpeg)).
+  Portrait: [Elizabeth](https://en.wikipedia.org/wiki/Elizabeth_of_Russia) (Yelizaveta Petrovna Romanova), daughter of Peter and Catherine, later Empress and Autocrat of All Russias, by an unknown artist ([source](https://commons.wikimedia.org/wiki/File:Elizabeth_of_Russia_%28Rostov_museum%29.jpeg)).
 
 If you like my card designs, you can also download them in a [single ZIP file](https://drive.google.com/open?id=1shBgYLNqtjkUHKxYrGRBY-0yrPAqrnBN).
 
