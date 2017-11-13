@@ -60,46 +60,46 @@ public abstract class UtilityPlayerController : AIPlayerController {
 	protected float GetTacticalDanger(PlayerController Player, CardController RemainingHand) {
 		if(Player == null || Player == this) {
 			return 0;
+		} else {
+			float roundHistoryDanger = GetRelativePriority(Player, MyPerceptor.HowManyOthersHasPlayerKnockedOut);
+			float playerKnowledgeDanger = (MyPerceptor.PlayerThinksMyHandIs(Player) == RemainingHand.Value) ? 1f : 0;
+			return (roundHistoryDanger + playerKnowledgeDanger) / 2f;
 		}
-		float sum = 0;
-		foreach(PlayerController p in Game.Players) {
-			sum += MyPerceptor.HowManyOthersHasPlayerKnockedOut(p);
-		}
-		float roundHistoryDanger = (sum > 0) ? ((float)MyPerceptor.HowManyOthersHasPlayerKnockedOut(Player)) / sum : 0;
-		float playerKnowledgeDanger = (MyPerceptor.PlayerThinksMyHandIs(Player) == RemainingHand.Value) ? 1f : 0;
-		return (roundHistoryDanger + playerKnowledgeDanger) / 2f;
 	}
 
 	protected float GetStrategicDanger(PlayerController Player) {
 		if(Player == null || Player == this) {
 			return 0;
-		}
-		float sum = 0;
-		foreach(PlayerController p in Game.Players) {
-			if(p != this) {
-				sum += p.HeartCount;
-			}
-		}
-		if(sum > 0) {
-			return ((float)Player.HeartCount) / sum;
 		} else {
-			return 0;
+			return GetRelativePriority(Player, (PlayerController p) => p.HeartCount);
 		}
 	}
 
 	protected float GetGrudgeAgainst(PlayerController Player) {
 		if(Player == null || Player == this) {
 			return 0;
-		}
-		float sum = 0;
-		foreach(PlayerController p in Game.Players) {
-			sum += MyPerceptor.HowManyOthersHasPlayerKnockedOut(p);
-		}
-		if(sum > 0) {
-			return ((float)MyPerceptor.HowManyOthersHasPlayerKnockedOut(Player)) / sum;
 		} else {
-			return 0;
+			return GetRelativePriority(Player, MyPerceptor.HowOftenHasPlayerTargetedMe);
 		}
+	}
+
+	protected delegate int ReadIntForPlayer(PlayerController Player);
+
+	// This method determines the priority of a given player based on the given perceptor function,
+	// relative to the span between the lowest and the highest value of that function across all players
+	protected float GetRelativePriority(PlayerController Player, ReadIntForPlayer GetRawPerceptorValue) {
+		// Determine the least and the most values a player has to establish the range
+		int least = int.MaxValue, most = int.MinValue, thisPlayerHas = 0;
+		foreach(PlayerController p in Game.Players) {
+			int cnt = GetRawPerceptorValue(p);
+			least = Mathf.Min(least, cnt);
+			most = Mathf.Max(most, cnt);
+			if(p == Player) {
+				thisPlayerHas = cnt;
+			}
+		}
+		// Return the player's relative position within that range
+		return ((float)thisPlayerHas - least) / Mathf.Max(1, most - least);
 	}
 
 	public override void Reset() {
