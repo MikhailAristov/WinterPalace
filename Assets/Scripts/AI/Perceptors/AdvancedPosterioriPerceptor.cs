@@ -286,7 +286,7 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 				Hand1Prob = HandDistribution[HiddenHands[0]][h1];
 				// Check constraints
 				if(Hand1Prob <= 0 || CountUnaccountedForCards[h1] <= 0) {
-					Hand1Prob = 0;
+					continue;
 				}
 			}
 			// Loop through the second hidden hand
@@ -297,7 +297,7 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 					Hand2Prob = HandDistribution[HiddenHands[1]][h2];
 					// Check constraints
 					if(Hand2Prob <= 0 || CountUnaccountedForCards[h2] <= 0 || (h1 == h2 && CountUnaccountedForCards[h2] < 2)) {
-						Hand2Prob = 0;
+						continue;
 					}
 				}
 				// Loop through the last hidden hand
@@ -310,7 +310,7 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 						if(Hand3Prob <= 0 || CountUnaccountedForCards[h3] <= 0 ||
 							((h1 == h3 || h2 == h3) && CountUnaccountedForCards[h3] < 2) ||
 							(h1 == h2 && h2 == h3 && CountUnaccountedForCards[h3] < 3)) {
-							Hand3Prob = 0;
+							continue;
 						}
 					}
 					// Marginalize probabilities over each hand
