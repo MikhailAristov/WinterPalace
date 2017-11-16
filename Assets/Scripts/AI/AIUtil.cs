@@ -109,42 +109,52 @@ public static class AIUtil {
 		return Mathf.Abs(result);
 	}
 
-	public static void DisplayVector(string preface, float[] input) {
-		int length = input.GetLength(0);
+	public static void DisplayVector(string Preface, float[] Input) {
+		string output = string.Format("{0}:", Preface);
 
-		string output = "" + preface + ":\t";
-		for(int i = 0; i < length; i++) {
-			output += string.Format(" {0:F6}", input[i]);
+		float sum = 0;
+		for(int i = 0; i < Input.GetLength(0); i++) {
+			output += string.Format("\t{0:F6}", Input[i]);
+			sum += Input[i];
 		}
-		output += ("\nSUM: " + input.Sum().ToString());
+		output += string.Format("\nSUM: {0:F6}", sum);
 
 		Debug.Log(output);
 	}
 
-	public static void DisplayMatrix(string preface, float[,] input) {
-		int height = input.GetLength(0);
-		int width = input.GetLength(1);
+	public static void DisplayVector(string Preface, int[] Input) {
+		string output = string.Format("{0}:", Preface);
 
-		string output = "" + preface;
-		for(int i = 0; i < height; i++) {
+		int sum = 0;
+		for(int i = 0; i < Input.GetLength(0); i++) {
+			output += string.Format("\t{0:D}", Input[i]);
+			sum += Input[i];
+		}
+		output += string.Format("\nSUM: {0:D}", sum);
+
+		Debug.Log(output);
+	}
+
+	public static void DisplayMatrix(string Preface, float[,] Input) {
+		string output = string.Format("{0}:", Preface);
+
+		for(int i = 0; i < Input.GetLength(0); i++) {
 			output += "\n";
-			for(int j = 0; j < width; j++) {
-				output += string.Format(" {0:F6}", input[i, j]);
+			for(int j = 0; j < Input.GetLength(1); j++) {
+				output += string.Format("\t{0:F6}", Input[i, j]);
 			}
 		}
 
 		Debug.Log(output);
 	}
 
-	public static void DisplayMatrix(string preface, int[,] input) {
-		int height = input.GetLength(0);
-		int width = input.GetLength(1);
+	public static void DisplayMatrix(string Preface, int[,] Input) {
+		string output = string.Format("{0}:", Preface);
 
-		string output = "" + preface;
-		for(int i = 0; i < height; i++) {
+		for(int i = 0; i < Input.GetLength(0); i++) {
 			output += "\n";
-			for(int j = 0; j < width; j++) {
-				output += string.Format(" {0:D}", input[i, j]);
+			for(int j = 0; j < Input.GetLength(1); j++) {
+				output += string.Format("\t{0:D}", Input[i, j]);
 			}
 		}
 
