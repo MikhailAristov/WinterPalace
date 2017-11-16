@@ -41,16 +41,19 @@ public class CardPriest : CardController {
 		if(move.Target.Protected) {
 			result.Rank = MoveData.RANK_BARELY_SENSIBLE;
 		}
-		// The utility of playing a Priest is the measure of the current player's uncertainty regarding the target player's hand
-		float highestProbability = 0;
-		float[] TargetHandProbabilities = perceptorData.GetCardProbabilitiesInHand(move.Target);
-		for(int i = CardController.VALUE_GUARD; i <= CardController.VALUE_PRINCESS; i++) {
-			if(TargetHandProbabilities[i] > highestProbability) {
-				highestProbability = TargetHandProbabilities[i];
+		// The utility of playing a Priest is the measure of the current player's uncertainty regarding the target player's hand,
+		// but only if this player will have another turn, otherwise this knowledge is worthless (in which case the utility stays 0)
+		if(perceptorData.WillThisPlayerHaveAnotherTurn(move.Player)) {
+			float highestProbability = 0;
+			float[] TargetHandProbabilities = perceptorData.GetCardProbabilitiesInHand(move.Target);
+			for(int i = CardController.VALUE_GUARD; i <= CardController.VALUE_PRINCESS; i++) {
+				if(TargetHandProbabilities[i] > highestProbability) {
+					highestProbability = TargetHandProbabilities[i];
+				}
 			}
+			// The uncertainty score is the inverse of certainty
+			result.Utility = 1f - highestProbability;
 		}
-		// The uncertainty score is the inverse of certainty
-		result.Utility = 1f - highestProbability;
 		return result;
 	}
 }
