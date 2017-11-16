@@ -144,14 +144,11 @@ public abstract class PosterioriPerceptor : AIGenericPerceptor {
 		Array.Clear(PlayerIsKnockedOut, 0, PlayerCount);
 	}
 
-	// Evaluations show that, for some reason, the base deck distribution
-	// is on average a more accurate estimation than using the filtered deck distribution
-	// Nonetheless, the filtered deck distribution brings better results for hand filtering
 	public override float GetCardProbabilityInDeck(int CardValue) {
 		Debug.Assert(!AnalysisOngoing);
 		Debug.Assert(DeckDistribution != null);
 		Debug.Assert(CardValue >= 0 && CardValue <= CardController.VALUE_PRINCESS);
-		return BaseDeckDistribution[CardValue];
+		return DeckDistribution[CardValue];
 	}
 
 	public override float GetCardProbabilityInHand(PlayerController Player, int CardValue) {
