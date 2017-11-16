@@ -91,15 +91,18 @@ public abstract class UtilityPlayerController : AIPlayerController {
 		// Determine the least and the most values a player has to establish the range
 		int least = int.MaxValue, most = int.MinValue, thisPlayerHas = 0;
 		foreach(PlayerController p in Game.Players) {
-			int cnt = GetRawPerceptorValue(p);
-			least = Mathf.Min(least, cnt);
-			most = Mathf.Max(most, cnt);
-			if(p == Player) {
-				thisPlayerHas = cnt;
+			// Ignore oneself (i.e. set one's own priority to 0)
+			if(p != this) {
+				int cnt = GetRawPerceptorValue(p);
+				least = Mathf.Min(least, cnt);
+				most = Mathf.Max(most, cnt);
+				if(p == Player) {
+					thisPlayerHas = cnt;
+				}
 			}
 		}
 		// Return the player's relative position within that range
-		return ((float)thisPlayerHas - least) / Mathf.Max(1, most - least);
+		return Mathf.Max(0, (float)thisPlayerHas - least) / Mathf.Max(1, most - least);
 	}
 
 	public override void Reset() {
