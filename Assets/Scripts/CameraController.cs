@@ -11,6 +11,8 @@ public class CameraController : MonoBehaviour {
 	// Use this for initialization
 	void Start() {
 		adjustToAspectRatio();
+		// Set screen timeout to never-sleep
+		Screen.sleepTimeout = SleepTimeout.NeverSleep;
 	}
 
 	// Update is called once per frame
@@ -31,5 +33,9 @@ public class CameraController : MonoBehaviour {
 		string filepath = String.Format("{0}/screenshot_{1:yyyyMMddHHmmssfff}.png", Application.persistentDataPath, System.DateTime.Now);
 		ScreenCapture.CaptureScreenshot(filepath);
 		Debug.LogFormat("Screenshot saved to {0}.", filepath);
+	}
+
+	void OnApplicationQuit() {
+		Screen.sleepTimeout = SleepTimeout.SystemSetting;
 	}
 }
