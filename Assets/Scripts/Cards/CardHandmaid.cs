@@ -16,6 +16,10 @@ public class CardHandmaid : CardController {
 		get { return false; }
 	}
 
+	public override bool CanBePlayedAgainstOneself {
+		get { return false; }
+	}
+
 	public override List<MoveData> GetLegalMoves(GameController game, PlayerController player) {
 		// The Handmaid is always played in standalone mode
 		return new List<MoveData> { new MoveData(player, this) };

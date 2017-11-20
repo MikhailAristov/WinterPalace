@@ -18,6 +18,10 @@ public class CardGuard : CardController {
 		get { return true; }
 	}
 
+	public override bool CanBePlayedAgainstOneself {
+		get { return false; }
+	}
+
 	public override List<MoveData> GetLegalMoves(GameController game, PlayerController player) {
 		List<MoveData> result = new List<MoveData>();
 		// The Guard is legal to play against any other player who is not knocked out yet

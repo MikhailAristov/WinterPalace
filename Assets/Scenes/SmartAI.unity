@@ -309,6 +309,11 @@ Prefab:
       propertyPath: m_Name
       value: Athos
       objectReference: {fileID: 0}
+    - target: {fileID: 114412196348216752, guid: e13a4583fc67c93459c99f1e109133d3,
+        type: 2}
+      propertyPath: DisplayName
+      value: Athos
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: e13a4583fc67c93459c99f1e109133d3, type: 2}
   m_IsPrefabParent: 0

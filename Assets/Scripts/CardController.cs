@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class CardController : MonoBehaviour {
+public abstract class CardController : MonoBehaviour, IClickable {
 
 	public const int VALUE_GUARD = 1;
 	public const int VALUE_PRIEST = 2;
@@ -21,6 +21,7 @@ public abstract class CardController : MonoBehaviour {
 	public abstract int Value { get; }
 	public abstract bool RequiresTarget { get; }
 	public abstract bool RequiresTargetHandGuess { get; }
+	public abstract bool CanBePlayedAgainstOneself { get; }
 	public bool FaceUp;
 
 	public Vector3 TargetPosition;
@@ -148,11 +149,8 @@ public abstract class CardController : MonoBehaviour {
 
 	public abstract MoveData.DualUtility EstimateMoveUtility(MoveData move, CardController otherCard, AIGenericPerceptor perceptorData);
 
-	void OnMouseDown() {
-		GameObject GC = GameObject.FindGameObjectWithTag("GameController");
-		if(GC != null && GC.GetComponent<GameController>().HumanPlayer != null) {
-			GC.GetComponent<GameController>().HumanPlayer.InterruptClickOnCard(this);
-		}
+	public int GetValue() {
+		return Value;
 	}
 
 	public PlayerController GetOwner() {
@@ -162,6 +160,10 @@ public abstract class CardController : MonoBehaviour {
 			Debug.LogWarningFormat("{0} is not held by any player! Parent: {1}", this, transform.parent);
 			return null;
 		}
+	}
+
+	public CardController GetCard() {
+		return this;
 	}
 
 	public void HighlightWithColor(Color Highlight) {

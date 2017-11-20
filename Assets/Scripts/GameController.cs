@@ -101,12 +101,6 @@ public class GameController : MonoBehaviour {
 		Cards = Deck.GetComponentsInChildren<CardController>();
 		Debug.Assert(Cards.Length == TOTAL_CARD_COUNT);
 		TurnHistory = new List<MoveData>();
-		// If there is a CardGuessSelector, update its back-references
-		if(HumanPlayer != null && HumanPlayer.GuessSelector != null) {
-			foreach(GuessSelectorController gsc in HumanPlayer.GuessSelector.GetComponentsInChildren<GuessSelectorController>()) {
-				gsc.Game = this;
-			}
-		}
 	}
 	
 	// Update is called once per frame

@@ -14,6 +14,24 @@ public class UIPlayerController : PlayerController {
 	protected bool WaitingForGuess = false;
 	protected int LatestGuess = 0;
 
+	void Awake() {
+		Input.simulateMouseWithTouches = false;
+	}
+
+	void Update() {
+		// Check for mouse clicks and/or screen touches
+		if((WaitingForInput || WaitingForGuess) && (Input.GetMouseButtonDown(0) || Input.touchCount > 0)) {
+			// Get the input position
+			Vector3 inputPos = (Input.touchCount > 0) ? (Vector3)Input.touches[0].position : Input.mousePosition;
+			// Call the appropriate raycast from that position -- it will deal with the rest
+			if(WaitingForInput) {
+				RaycastCheck<CardController>(inputPos);
+			} else if(WaitingForGuess) {
+				RaycastCheck<GuessSelectorController>(inputPos);
+			}
+		}
+	}
+
 	protected override IEnumerator PickAMove() {
 		Debug.Assert(myHand != null);
 		Debug.Assert(justDrawn != null);
@@ -48,12 +66,16 @@ public class UIPlayerController : PlayerController {
 				// Highlight the card
 				myMove.Card.HighlightWithColor(Color.green);
 				// Wait for input of the target for this card
-				WaitingForInput = true;
-				LatestInput = null;
-				yield return new WaitUntil(() => (LatestInput != null));
-				WaitingForInput = false;
+				do {
+					WaitingForInput = true;
+					LatestInput = null;
+					yield return new WaitUntil(() => (LatestInput != null));
+					WaitingForInput = false;
+					// Only the Prince can be played against oneself:
+				} while(LatestInputOwner == this && !myMove.Card.CanBePlayedAgainstOneself);
 				// Set the target
 				myMove.Target = LatestInputOwner;
+				// Check if the card additionally requires a hand guess
 				if(myMove.Card.RequiresTargetHandGuess) {
 					// Highlight the targeted player's hand
 					LatestInput.HighlightWithColor(Color.blue);
@@ -117,23 +139,30 @@ public class UIPlayerController : PlayerController {
 		return;
 	}
 
-	public void InterruptClickOnCard(CardController Card) {
-		if(!WaitingForInput) {
-			return;
+	// Projects a ray from the given position to a clickable element (a card or a card guess selector)
+	// and sets its values accordingly into the input variables
+	protected void RaycastCheck<T>(Vector3 screenPosition) where T:IClickable {
+		// Get ray and raycast hit
+		Ray ray = Camera.main.ScreenPointToRay(screenPosition);
+		RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity);
+		// Check if it hits anything
+		if(hit) {
+			Transform objectHit = hit.transform;
+			// Check if it has the necessary component
+			T controller = objectHit.GetComponent<T>();
+			if(controller != null) {
+				if(typeof(T) == typeof(GuessSelectorController)) {
+					Debug.Assert(LatestGuess == 0);
+					LatestGuess = controller.GetValue();
+				} else if(typeof(T) == typeof(CardController)) {
+					Debug.Assert(LatestInput == null);
+					// Only save the input if it has a defined owner
+					LatestInputOwner = controller.GetOwner();
+					if(LatestInputOwner != null) {
+						LatestInput = controller.GetCard();
+					}
+				}
+			}
 		}
-		Debug.Assert(LatestInput == null);
-		// Only save the input if it has a defined owner
-		LatestInputOwner = Card.GetOwner();
-		if(LatestInputOwner != null) {
-			LatestInput = Card;
-		}
-	}
-
-	public void InterruptClickOnGameSelector(GuessSelectorController Guess) {
-		if(!WaitingForGuess) {
-			return;
-		}
-		Debug.Assert(LatestGuess == 0);
-		LatestGuess = Guess.Value;
 	}
 }

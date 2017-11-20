@@ -16,6 +16,10 @@ public class CardCountess : CardController {
 		get { return false; }
 	}
 
+	public override bool CanBePlayedAgainstOneself {
+		get { return false; }
+	}
+
 	public override List<MoveData> GetLegalMoves(GameController game, PlayerController player) {
 		// The Countess is always played in standalone mode
 		// The rule that you MUST play it when your other card is a King or a Prince will be handled in the Resolve()

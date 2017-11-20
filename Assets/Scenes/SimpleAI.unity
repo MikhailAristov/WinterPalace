@@ -634,6 +634,11 @@ Prefab:
       propertyPath: m_Name
       value: Aramis
       objectReference: {fileID: 0}
+    - target: {fileID: 114524670041280832, guid: e622de958fd051c4591debff847e9400,
+        type: 2}
+      propertyPath: DisplayName
+      value: Aramis
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: e622de958fd051c4591debff847e9400, type: 2}
   m_IsPrefabParent: 0
@@ -689,6 +694,11 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1937799007311466, guid: e622de958fd051c4591debff847e9400, type: 2}
       propertyPath: m_Name
+      value: Athos
+      objectReference: {fileID: 0}
+    - target: {fileID: 114524670041280832, guid: e622de958fd051c4591debff847e9400,
+        type: 2}
+      propertyPath: DisplayName
       value: Athos
       objectReference: {fileID: 0}
     m_RemovedComponents: []

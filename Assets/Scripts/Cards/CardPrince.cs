@@ -16,6 +16,10 @@ public class CardPrince : CardController {
 		get { return false; }
 	}
 
+	public override bool CanBePlayedAgainstOneself {
+		get { return true; }
+	}
+
 	public override List<MoveData> GetLegalMoves(GameController game, PlayerController player) {
 		List<MoveData> result = new List<MoveData>();
 		// The Prince is legal to play against any player who is not knocked out yet
