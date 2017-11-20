@@ -20,7 +20,7 @@ public class UIPlayerController : PlayerController {
 
 	void Update() {
 		// Check for mouse clicks and/or screen touches
-		if((WaitingForInput || WaitingForGuess) && (Input.GetMouseButtonDown(0) || Input.touchCount > 0)) {
+		if((WaitingForInput || WaitingForGuess) && (Input.GetMouseButtonDown(0) || (Input.touchCount == 1 && Input.touches[0].phase == TouchPhase.Ended))) {
 			// Get the input position
 			Vector3 inputPos = (Input.touchCount > 0) ? (Vector3)Input.touches[0].position : Input.mousePosition;
 			// Call the appropriate raycast from that position -- it will deal with the rest
