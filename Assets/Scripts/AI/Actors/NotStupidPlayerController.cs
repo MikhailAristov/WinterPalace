@@ -81,7 +81,8 @@ public class NotStupidPlayerController : AIPlayerController {
 	// Playing a Princess or not playing a Countess when you have a Prince/King will result in instantly losing the round
 	// Such moves should not even be considered
 	protected bool IsMoveSuicidal(MoveData move, CardController otherCard) {
-		return (CardController.IsKnockOutByPrincess(move.Card.Value) || CardController.IsKnockOutByCountess(move.Card.Value, otherCard.Value));
+		return (CardController.IsKnockOutByPrincess(move.Card.Value, otherCard.Value, move.Player == move.Target) 
+			|| CardController.IsKnockOutByCountess(move.Card.Value, otherCard.Value));
 	}
 
 	// Returns whether the move under consideration looks stupid or not

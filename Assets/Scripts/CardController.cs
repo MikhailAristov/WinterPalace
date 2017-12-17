@@ -138,8 +138,9 @@ public abstract class CardController : MonoBehaviour, IClickable {
 
 	protected abstract void SpecificResolve(MoveData move);
 
-	public static bool IsKnockOutByPrincess(int PlayedCardValue) {
-		return (PlayedCardValue == CardController.VALUE_PRINCESS);
+	public static bool IsKnockOutByPrincess(int PlayedCardValue, int OtherCardValue, bool TargetIsMyself) {
+		return (PlayedCardValue == CardController.VALUE_PRINCESS ||
+			(TargetIsMyself && PlayedCardValue == CardController.VALUE_PRINCE && OtherCardValue == CardController.VALUE_PRINCESS));
 	}
 
 	public static bool IsKnockOutByCountess(int playedCardValue, int otherCardValue) {

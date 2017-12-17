@@ -9,10 +9,12 @@ public class RandomPlayerController : AIPlayerController {
 		availableMoves.AddRange(justDrawn.GetLegalMoves(Game, this));
 		// Prevent stupid moves, i.e. ones that instantly knock you out
 		MoveData chosenMove = availableMoves[0];
+		int otherCardValue = 0;
 		do {
 			chosenMove = availableMoves[UnityEngine.Random.Range(0, availableMoves.Count)];
-		} while(CardController.IsKnockOutByPrincess(chosenMove.Card.Value) ||
-			CardController.IsKnockOutByCountess(chosenMove.Card.Value, (chosenMove.Card == justDrawn) ? myHand.Value : justDrawn.Value));
+			otherCardValue = (chosenMove.Card == justDrawn) ? myHand.Value : justDrawn.Value;
+		} while(CardController.IsKnockOutByPrincess(chosenMove.Card.Value, otherCardValue, chosenMove.Player == chosenMove.Target) ||
+			CardController.IsKnockOutByCountess(chosenMove.Card.Value, otherCardValue));
 		myNextMove = chosenMove;
 		yield return null;
 	}

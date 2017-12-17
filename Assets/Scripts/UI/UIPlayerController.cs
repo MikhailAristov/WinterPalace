@@ -55,7 +55,7 @@ public class UIPlayerController : PlayerController {
 			// Also check for illegal moves before proceeding
 			RemainingHand = (LatestInput == myHand) ? justDrawn : myHand;
 			RemainingHand.ResetHighlighting();
-			if(CardController.IsKnockOutByPrincess(LatestInput.Value) ||
+			if(CardController.IsKnockOutByPrincess(LatestInput.Value, RemainingHand.Value, false) ||
 			   CardController.IsKnockOutByCountess(LatestInput.Value, RemainingHand.Value)) {
 				LatestInput.HighlightWithColor(Color.red);
 				continue;
