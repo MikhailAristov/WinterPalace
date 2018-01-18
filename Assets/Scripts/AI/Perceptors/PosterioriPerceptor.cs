@@ -48,8 +48,8 @@ public abstract class PosterioriPerceptor : AIGenericPerceptor {
 	protected static bool PrecomputationsComplete = false;
 	protected static float[] BaseDeckDistribution;
 
-	// These values were obtained empirically and represent the likelihood of playing 
-	// the card with the value equal to index1, while leaving a card with index2 in hand
+	// These values were obtained via a Monte Carlo experiment and represent the likelihood of 
+	// playing the card with the value equal to index1, while leaving a card with index2 in hand
 	protected static float[,] LikelihoodOfPlay = {
 		{ 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f }, 
 		{ 0.000f, 1.000f, 0.100f, 0.995f, 0.990f, 0.950f, 0.990f, 0.990f, 1.000f }, 
