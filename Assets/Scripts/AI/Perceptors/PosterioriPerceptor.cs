@@ -48,7 +48,7 @@ public abstract class PosterioriPerceptor : AIGenericPerceptor {
 	protected static bool PrecomputationsComplete = false;
 	protected static float[] BaseDeckDistribution;
 
-	// These values were obtained via a Monte Carlo experiment and represent the likelihood of 
+	// These values were obtained via a Monte Carlo experiment and represent the likelihood of
 	// playing the card with the value equal to index1, while leaving a card with index2 in hand
 	protected static float[,] LikelihoodOfPlay = {
 		{ 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f }, 
@@ -223,7 +223,13 @@ public abstract class PosterioriPerceptor : AIGenericPerceptor {
 		}
 		// Renormalize the array if necessary
 		RenormalizeCardDistribution(ref HandDistribution[PlayerIndex], PlayerIndex);
+		// Call the subroutine for additional updates
+		if(probPlayFromHAND > 0) {
+			FilterWhenPlayingFromHand(PlayerIndex);
+		}
 	}
+
+	protected abstract void FilterWhenPlayingFromHand(int PlayerIndex);
 
 	// If we know for sure that a hidden hand does not contain a certain card value,
 	// we set that value's probability to 0 and renormalize the hand distribution

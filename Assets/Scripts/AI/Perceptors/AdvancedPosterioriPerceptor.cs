@@ -9,6 +9,10 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 
 	protected int[] HiddenHands;
 
+	// This set contains the IDs of players whom we know to have the same hands
+	// because one of them has played the Baron which resulted in a draw
+	protected Dictionary<int, int> SameHands;
+
 	// Return the index of the next player, according to turn history
 	protected int NextPlayerIndex {
 		get {
@@ -31,11 +35,15 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 				HiddenHands[counter++] = i;
 			}
 		}
+		SameHands = new Dictionary<int, int>();
 	}
 
 	// Same reset as for base class, but also start waiting for the initial draw
 	public override void ResetMemory() {
 		base.ResetMemory();
+		if(SameHands != null) {
+			SameHands.Clear();
+		}
 		// After resetting memory, wait for the first card or cards to be drawn
 		if(GameInitialized) {
 			AnalysisOngoing = true;
@@ -120,6 +128,7 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 				// I at least know what their hand is NOT
 				if(!IWasTheTarget) {
 					HiddenHandIsNot(turn.Target.SittingOrder, turn.TargetHandGuess);
+					UpdateSameHands(turn.Target.SittingOrder);
 				}
 				break;
 			case CardController.VALUE_PRIEST:
@@ -128,6 +137,7 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 					// With a Priest, I now know the target's hand
 					Debug.Assert(turn.Target == lastLearnedHandOf);
 					UpdateHandDistributionWithCertainty(lastLearnedHandOf.SittingOrder, lastLearnedCard.Value);
+					UpdateSameHands(lastLearnedHandOf.SittingOrder);
 				} else if(IWasTheTarget) {
 					// But if I was the target, the other player now knows my hand!
 					PlayerKnowsThatMyHandIs[turn.Player.SittingOrder] = myHand.Value;
@@ -161,6 +171,7 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 					// Otherwise, the special Prince filter logic applies (the values are automatically renormalized)
 					PrinceEffectFilterWithoutKnockout(turn.Target.SittingOrder, turn.AdditionalDiscard.Value);
 					RenormalizationCommenced = true;
+					ClearSameHands(turn.Target.SittingOrder);
 				}
 				break;
 			case CardController.VALUE_KING:
@@ -200,6 +211,9 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 		NextTurnToAnalyze = id + 1;
 		if(FullLogging) {
 			displayCurrentBeliefs();
+			if(SameHands.Count > 0) {
+				Debug.Log(name + " also knows following same hands: " + AIUtil.FormatDictionary(SameHands));
+			}
 		}
 		yield return new WaitForFixedUpdate();
 		AnalysisOngoing = false;
@@ -210,6 +224,11 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 		Array.Clear(HandDistribution[KnockedOutPlayerIndex], 0, CARD_VECTOR_LENGTH);
 		AccountForCard(DiscardedHandValue);
 		PlayerIsKnockedOut[KnockedOutPlayerIndex] = true;
+		// Account for same cards
+		if(SameHands.ContainsKey(KnockedOutPlayerIndex)) {
+			UpdateHandDistributionWithCertainty(SameHands[KnockedOutPlayerIndex], DiscardedHandValue);
+			ClearSameHands(KnockedOutPlayerIndex);
+		}
 	}
 
 	// If the Baron has knocked a player out, it gives us a lot of information about the winner's hand
@@ -237,7 +256,38 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 			RenormalizeCardDistribution(ref HandDistribution[playerIndex], playerIndex);
 			// And copy it over the target's distribution
 			Array.Copy(HandDistribution[playerIndex], HandDistribution[targetIndex], CARD_VECTOR_LENGTH);
+			// Save the fact that they have the same hand
+			if(!SameHands.ContainsKey(playerIndex)) {
+				SameHands.Add(playerIndex, targetIndex);
+				SameHands.Add(targetIndex, playerIndex);
+			}
 		}
+	}
+
+	// If we know that the player whose hand distribution we've just updated
+	// has the same hand as another, we update that other player's hand distribution, too
+	protected void UpdateSameHands(int TargetHand) {
+		if(SameHands.ContainsKey(TargetHand)) {
+			Array.Copy(HandDistribution[TargetHand], HandDistribution[SameHands[TargetHand]], CARD_VECTOR_LENGTH);
+		}
+	}
+
+	// With this, we forget our notion that two players' hands are of the same value
+	protected void ClearSameHands(int TargetHand) {
+		if(SameHands.ContainsKey(TargetHand)) {
+			int otherHand = SameHands[TargetHand];
+			SameHands.Remove(TargetHand);
+			if(SameHands.ContainsKey(otherHand)) {
+				SameHands.Remove(otherHand);
+			}
+		}
+	}
+
+	// When we know that the current player has had the same hand as another,
+	// and there exists a possibility that he has just played that card,
+	// we must assume that their hands are NOT the same anymore
+	protected override void FilterWhenPlayingFromHand(int PlayerIndex) {
+		ClearSameHands(PlayerIndex);
 	}
 
 	// If a Prince had been played against someone other than me and they weren't knocked out,
@@ -308,8 +358,8 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 						Hand3Prob = HandDistribution[HiddenHands[2]][h3];
 						// Check constraints
 						if(Hand3Prob <= 0 || CountUnaccountedForCards[h3] <= 0 ||
-							((h1 == h3 || h2 == h3) && CountUnaccountedForCards[h3] < 2) ||
-							(h1 == h2 && h2 == h3 && CountUnaccountedForCards[h3] < 3)) {
+						   ((h1 == h3 || h2 == h3) && CountUnaccountedForCards[h3] < 2) ||
+						   (h1 == h2 && h2 == h3 && CountUnaccountedForCards[h3] < 3)) {
 							continue;
 						}
 					}
@@ -322,9 +372,9 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 					for(int dc = CardController.VALUE_GUARD; dc <= CardController.VALUE_PRINCESS; dc++) {
 						// Hypothetically, if each of the hands were h1, h2, and h3, what would be left of this card type in the deck?
 						int CardsOfThisValueLeftInDeck = Mathf.Max(0, CountUnaccountedForCards[dc] -
-							(!PlayerIsKnockedOut[HiddenHands[0]] && (dc == h1) ? 1 : 0) - 
-							(!PlayerIsKnockedOut[HiddenHands[1]] && (dc == h2) ? 1 : 0) - 
-							(!PlayerIsKnockedOut[HiddenHands[2]] && (dc == h3) ? 1 : 0));
+						                                 (!PlayerIsKnockedOut[HiddenHands[0]] && (dc == h1) ? 1 : 0) -
+						                                 (!PlayerIsKnockedOut[HiddenHands[1]] && (dc == h2) ? 1 : 0) -
+						                                 (!PlayerIsKnockedOut[HiddenHands[2]] && (dc == h3) ? 1 : 0));
 						// Sum up the probability of this card in the deck
 						NewDeckCount[dc] += jointProb * CardsOfThisValueLeftInDeck;
 					}

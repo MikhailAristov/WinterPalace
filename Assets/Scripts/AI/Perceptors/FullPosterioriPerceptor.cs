@@ -164,5 +164,8 @@ public class FullPosterioriPerceptor : PosterioriPerceptor {
 		// Dirty, but efficient
 		RenormalizeCardDistribution(ref DeckDistribution);
 	}
-	
+
+	protected override void FilterWhenPlayingFromHand(int PlayerIndex) {
+		return;
+	}
 }

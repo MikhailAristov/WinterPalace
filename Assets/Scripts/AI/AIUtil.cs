@@ -160,4 +160,12 @@ public static class AIUtil {
 
 		Debug.Log(output);
 	}
+
+	public static string FormatDictionary<TK,TV>(Dictionary<TK,TV> dict) {
+		string result = "";
+		foreach(TK key in dict.Keys) {
+			result += (result.Length > 0 ? "; " : "") + (key.ToString() + " = " + dict[key].ToString());
+		}
+		return result;
+	}
 }
