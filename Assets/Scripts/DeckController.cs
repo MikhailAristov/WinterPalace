@@ -7,6 +7,10 @@ public class DeckController : MonoBehaviour {
 
 	private Stack<CardController> CARDS;
 
+	// For debugging: Specify the complete deck sequence from bottom to top
+	public bool UseDebugDeck;
+	public int[] DebugDeck;
+
 	private int initialDeckSize;
 	private int[] CardCount;
 	private const float VERTICAL_SHIFT = CardController.WIDTH / 15;
@@ -39,11 +43,21 @@ public class DeckController : MonoBehaviour {
 		initialDeckSize = cardControllers.Length;
 		Debug.Assert(initialDeckSize == GameController.TOTAL_CARD_COUNT);
 		// Shuffle the objects in the array randomly
-		int swapWith;
+		int swapWith = 0;
 		CardController tempCC;
 		for(int i = 0; i < cardControllers.Length; i++) {
-			// Pick a random element from the unsorted deck
-			swapWith = UnityEngine.Random.Range(i, cardControllers.Length);
+			// Sort the deck into intended order for debugging or shuffle it randomly
+			if(Debug.isDebugBuild && UseDebugDeck &&
+				DebugDeck != null && DebugDeck.Length == cardControllers.Length) {
+				for(int j = i; j < cardControllers.Length; j++) {
+					if(cardControllers[j].Value == DebugDeck[i]) {
+						swapWith = j;
+						break;
+					}
+				}
+			} else {
+				swapWith = UnityEngine.Random.Range(i, cardControllers.Length);
+			}
 			// Swap the picked element with the current one in the loop
 			tempCC = cardControllers[swapWith];
 			cardControllers[swapWith] = cardControllers[i];
