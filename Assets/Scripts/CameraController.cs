@@ -24,7 +24,7 @@ public class CameraController : MonoBehaviour {
 
 	// Adjust the camera's orthographic "zoom" so that the entire table is visible in the current resolution
 	private void adjustToAspectRatio() {
-		Camera.main.orthographicSize = (float)Math.Round(VISIBLE_TABLE_WIDTH / 2 / Camera.main.aspect, 1);
+		Camera.main.orthographicSize = VISIBLE_TABLE_WIDTH / 2 / Camera.main.aspect;
 		adjustedToAspectRatio = Camera.main.aspect;
 	}
 
