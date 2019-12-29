@@ -50,17 +50,17 @@ public abstract class PosterioriPerceptor : AIGenericPerceptor {
 
 	// These values were obtained via a Monte Carlo experiment and represent the likelihood of
 	// playing the card with the value equal to index1, while leaving a card with index2 in hand
-	protected static float[,] LikelihoodOfPlay = {
-		{ 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f }, 
-		{ 0.000f, 1.000f, 0.100f, 0.995f, 0.990f, 0.950f, 0.990f, 0.990f, 1.000f }, 
-		{ 0.000f, 0.900f, 1.000f, 0.990f, 0.990f, 0.900f, 0.900f, 0.900f, 1.000f }, 
-		{ 0.000f, 0.005f, 0.010f, 1.000f, 0.850f, 0.850f, 0.900f, 0.990f, 1.000f }, 
-		{ 0.000f, 0.010f, 0.010f, 0.150f, 1.000f, 0.005f, 0.650f, 0.800f, 1.000f }, 
-		{ 0.000f, 0.050f, 0.100f, 0.150f, 0.995f, 1.000f, 0.750f, 0.000f, 1.000f }, 
-		{ 0.000f, 0.010f, 0.100f, 0.100f, 0.350f, 0.250f, 0.000f, 0.000f, 1.000f }, 
-		{ 0.000f, 0.010f, 0.100f, 0.010f, 0.200f, 1.000f, 1.000f, 0.000f, 1.000f }, 
-		{ 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f, 0.000f }
-	};
+	public static float[,] LikelihoodOfPlay = {
+      { 0, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0f },
+      { 0, 1.00000f, 0.10526f, 0.99995f, 0.99085f, 0.94975f, 0.96390f, 0.96460f, 1f },
+      { 0, 0.89474f, 1.00000f, 0.99187f, 0.99367f, 0.91729f, 0.89423f, 0.97619f, 1f },
+      { 0, 0.00005f, 0.00813f, 1.00000f, 0.78947f, 0.84615f, 0.84956f, 0.92157f, 1f },
+      { 0, 0.00915f, 0.00633f, 0.21053f, 1.00000f, 0.00005f, 0.67333f, 0.79570f, 1f },
+      { 0, 0.05025f, 0.08271f, 0.15385f, 0.99995f, 1.00000f, 0.72519f, 0.00000f, 1f },
+      { 0, 0.03610f, 0.10577f, 0.15044f, 0.32667f, 0.27481f, 0.00000f, 0.00000f, 1f },
+      { 0, 0.03540f, 0.02381f, 0.07843f, 0.20430f, 1.00000f, 1.00000f, 0.00000f, 1f },
+      { 0, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0.00000f, 0f }
+    };
 
 	// These can be used for re-estimating the LikelihoodOfPlay parameters
 	protected static bool CollectStatisticsOfPlay = false;
