@@ -100,7 +100,7 @@ public abstract class PlayerController : MonoBehaviour {
 		StartCoroutine(drawCard());
 		yield return new WaitUntil(() => (!waitingForTheDraw));
 		// Also wait for the perceptor evaluation, if any
-		if(Game.PerceptorEvaluator != null) {
+		if(Game.PerceptorEvaluator != null && Game.PerceptorEvaluator.isActiveAndEnabled) {
 			yield return new WaitUntil(() => Game.PerceptorEvaluator.READY);
 		}
 		// Pick a move with eithercard from the hand

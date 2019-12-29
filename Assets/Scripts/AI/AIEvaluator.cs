@@ -23,7 +23,7 @@ public class AIEvaluator : MonoBehaviour {
 
 	void Awake() {
 		// Initialize random seeds for fair evaluation
-		if(RandomSeed > 0) {
+		if(RandomSeed > 0 && isActiveAndEnabled) {
 			UnityEngine.Random.InitState(RandomSeed);
 			if(ExtraGameSeeds.Length > 0) {
 				for(int i = 0; i < ExtraGameSeeds.Length; i++) {

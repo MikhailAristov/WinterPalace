@@ -133,7 +133,7 @@ public class GameController : MonoBehaviour {
 
 	private IEnumerator roundSetup() {
 		float waitBetweenDraws = 0.5f;
-		if(PerceptorEvaluator != null) {
+		if(PerceptorEvaluator != null && PerceptorEvaluator.isActiveAndEnabled) {
 			PerceptorEvaluator.NextGameSeed();
 		}
 		// Shuffle the deck and wait until the deck is fully shuffled
@@ -171,7 +171,7 @@ public class GameController : MonoBehaviour {
 				Debug.LogFormat("{0} takes a turn...", curPlayer);
 				curPlayer.NextTurn();
 				yield return new WaitUntil(() => (EveryoneReady));
-				if(PerceptorEvaluator != null) {
+				if(PerceptorEvaluator != null && PerceptorEvaluator.isActiveAndEnabled) {
 					PerceptorEvaluator.UpdateStatistics(Deck.GetCardDistribution(), Deck.CountCardsLeft);
 				}
 			}
@@ -279,7 +279,7 @@ public class GameController : MonoBehaviour {
 	}
 
 	private IEnumerator resetRound() {
-		if(PerceptorEvaluator != null) {
+		if(PerceptorEvaluator != null && PerceptorEvaluator.isActiveAndEnabled) {
 			yield return new WaitUntil(() => PerceptorEvaluator.READY);
 		}
 		// Reset all cards from the discard back into the deck
