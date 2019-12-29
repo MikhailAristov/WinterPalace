@@ -86,7 +86,7 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 4542570922861556}
-  - component: {fileID: 114018400517761670}
+  - component: {fileID: 114733926830708858}
   - component: {fileID: 114412196348216752}
   m_Layer: 0
   m_Name: AdvancedAIPlayer
@@ -181,19 +181,6 @@ Transform:
   m_Father: {fileID: 4542570922861556}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
---- !u!114 &114018400517761670
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1671795171163592}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26f318364d3706845a09885b2ee5e603, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  MyController: {fileID: 114412196348216752}
-  FullLogging: 0
 --- !u!114 &114068371311173612
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -297,7 +284,20 @@ MonoBehaviour:
   Front: {fileID: 4839843652707446}
   HeartContainer: {fileID: 4761344123052042}
   SpeechOutput: {fileID: 224515284142059112}
-  MyPerceptor: {fileID: 114018400517761670}
+  MyPerceptor: {fileID: 114733926830708858}
+--- !u!114 &114733926830708858
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1671795171163592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60685e50740d20b488f9d2d4ba24f3ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MyController: {fileID: 114412196348216752}
+  FullLogging: 0
 --- !u!114 &114932030423783588
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -353,7 +353,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1024086181606174}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 3.7, z: 0}
   m_LocalScale: {x: 0.007, y: 0.004, z: 1}
   m_Children:
   - {fileID: 224947211818512362}

@@ -810,6 +810,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1672981238}
   - component: {fileID: 1672981239}
+  - component: {fileID: 624557006}
   - component: {fileID: 624557003}
   - component: {fileID: 624557004}
   - component: {fileID: 624557005}
@@ -826,7 +827,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 624557002}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26f318364d3706845a09885b2ee5e603, type: 3}
   m_Name: 
@@ -858,6 +859,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MyController: {fileID: 1672981239}
+--- !u!114 &624557006
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 624557002}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60685e50740d20b488f9d2d4ba24f3ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MyController: {fileID: 1672981239}
+  FullLogging: 0
 --- !u!1 &631778946
 GameObject:
   m_ObjectHideFlags: 0
@@ -898,6 +912,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1835172621}
   - component: {fileID: 1835172622}
+  - component: {fileID: 669351620}
   - component: {fileID: 669351617}
   - component: {fileID: 669351618}
   - component: {fileID: 669351619}
@@ -914,7 +929,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 669351616}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26f318364d3706845a09885b2ee5e603, type: 3}
   m_Name: 
@@ -946,6 +961,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MyController: {fileID: 1835172622}
+--- !u!114 &669351620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 669351616}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60685e50740d20b488f9d2d4ba24f3ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MyController: {fileID: 1835172622}
+  FullLogging: 0
 --- !u!1 &775506588
 GameObject:
   m_ObjectHideFlags: 0
@@ -1034,6 +1062,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1855239283}
   - component: {fileID: 1855239284}
+  - component: {fileID: 925686621}
   - component: {fileID: 925686618}
   - component: {fileID: 925686619}
   - component: {fileID: 925686620}
@@ -1050,7 +1079,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 925686617}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26f318364d3706845a09885b2ee5e603, type: 3}
   m_Name: 
@@ -1082,6 +1111,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MyController: {fileID: 1855239284}
+--- !u!114 &925686621
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 925686617}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60685e50740d20b488f9d2d4ba24f3ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MyController: {fileID: 1855239284}
+  FullLogging: 0
 --- !u!1001 &993281368
 Prefab:
   m_ObjectHideFlags: 0
@@ -1221,6 +1263,7 @@ GameObject:
   m_Component:
   - component: {fileID: 869887182}
   - component: {fileID: 1162800742}
+  - component: {fileID: 1162800746}
   - component: {fileID: 1162800743}
   - component: {fileID: 1162800744}
   - component: {fileID: 1162800745}
@@ -1254,14 +1297,14 @@ MonoBehaviour:
   Front: {fileID: 553754213}
   HeartContainer: {fileID: 1968289066}
   SpeechOutput: {fileID: 2035210175}
-  MyPerceptor: {fileID: 1162800743}
+  MyPerceptor: {fileID: 1162800746}
 --- !u!114 &1162800743
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1162800741}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 26f318364d3706845a09885b2ee5e603, type: 3}
   m_Name: 
@@ -1293,6 +1336,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MyController: {fileID: 1162800742}
+--- !u!114 &1162800746
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1162800741}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60685e50740d20b488f9d2d4ba24f3ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MyController: {fileID: 1162800742}
+  FullLogging: 0
 --- !u!1 &1245870825
 GameObject:
   m_ObjectHideFlags: 0
@@ -1460,6 +1516,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 19c932a150486db48abdd865ed4df85d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UseDebugDeck: 0
+  DebugDeck: 
 --- !u!1 &1273362080
 GameObject:
   m_ObjectHideFlags: 0
@@ -1802,7 +1860,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d8b73a3a32522243b057e207dd6a328, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  RandomSeed: 17571597
+  RandomSeed: 16572597
   ExtraGameSeeds: 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   CurrentGameSeed: 0
   Players:
@@ -1811,10 +1869,10 @@ MonoBehaviour:
   - {fileID: 1672981239}
   - {fileID: 1855239284}
   Perceptors:
-  - {fileID: 1162800743}
-  - {fileID: 669351617}
-  - {fileID: 624557003}
-  - {fileID: 925686618}
+  - {fileID: 1162800746}
+  - {fileID: 669351620}
+  - {fileID: 624557006}
+  - {fileID: 925686621}
 --- !u!1001 &1426698177
 Prefab:
   m_ObjectHideFlags: 0
@@ -2015,7 +2073,7 @@ MonoBehaviour:
   Front: {fileID: 1245870826}
   HeartContainer: {fileID: 1886636494}
   SpeechOutput: {fileID: 559167662}
-  MyPerceptor: {fileID: 624557003}
+  MyPerceptor: {fileID: 624557006}
 --- !u!1 &1675714346
 GameObject:
   m_ObjectHideFlags: 0
@@ -2350,7 +2408,7 @@ MonoBehaviour:
   Front: {fileID: 75064582}
   HeartContainer: {fileID: 471035902}
   SpeechOutput: {fileID: 1990077776}
-  MyPerceptor: {fileID: 669351617}
+  MyPerceptor: {fileID: 669351620}
 --- !u!4 &1855239283
 Transform:
   m_ObjectHideFlags: 0
@@ -2392,7 +2450,7 @@ MonoBehaviour:
   Front: {fileID: 863403642}
   HeartContainer: {fileID: 2045383808}
   SpeechOutput: {fileID: 1273362081}
-  MyPerceptor: {fileID: 925686618}
+  MyPerceptor: {fileID: 925686621}
 --- !u!1 &1871747343
 GameObject:
   m_ObjectHideFlags: 0
