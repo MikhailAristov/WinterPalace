@@ -2,13 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 
 public static class AIUtil {
 
-	public const float NEGLIGIBLE_PROBABILITY = 1e-5f;
+    public const float NEGLIGIBLE_PROBABILITY = 2e-5f;
 
 	public static T DeepCopy<T>(object objectToCopy) {
 		using(MemoryStream memoryStream = new MemoryStream()) {
@@ -51,15 +50,15 @@ public static class AIUtil {
 	public static float NormalizeProbabilitiesArray(ref float[] arr) {
 		// Calculate the sum
 		float sum = 0;
-		for(int i1 = 0; i1 < arr.Length; i1++) {
-			sum += Mathf.Max(0, arr[i1]);
+		for(int i0 = 0; i0 < arr.Length; i0++) {
+			sum += Mathf.Max(0, arr[i0]);
 		}
 		if(sum <= 0) {
 			Array.Clear(arr, 0, arr.Length);
 		} else {
 			// Divide all contents by the sum
-			for(int i2 = 0; i2 < arr.Length; i2++) {
-				arr[i2] = Mathf.Max(0, arr[i2]) / sum;
+			for(int i0 = 0; i0 < arr.Length; i0++) {
+				arr[i0] = Mathf.Max(0, arr[i0]) / sum;
 			}
 		}
 		return sum;
@@ -168,4 +167,44 @@ public static class AIUtil {
 		}
 		return result;
 	}
+
+    // Checks if two floating-point values are equal within the given margin of error
+    public static bool Approx(float a, float b, float margin = NEGLIGIBLE_PROBABILITY) {
+        return Mathf.Abs(a - b) < margin;
+    }
+
+    // Checks if a floating point value is within a given range (inclusive)
+    public static bool InRange(float val, float minVal, float maxVal) {
+        return (val >= minVal && val <= maxVal);
+    }
+
+    // Checks if an integer value is within a given range (min: inclusive, max: exclusive)
+    public static bool InRange(int val, int minVal, float maxVal) {
+        return (val >= minVal && val < maxVal);
+    }
+
+    // Returns the sum of all elements in a 1D array
+    public static int SumUpArray(int[] arr) {
+        int result = 0;
+        for(int i = 0; i < arr.Length; i++) {
+            result += arr[i];
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Shifts the array element with the given index to the last place of the array, keeping the others in the same order.
+    /// </summary>
+    /// <typeparam name="T">Array type.</typeparam>
+    /// <param name="arr">Reference to the array.</param>
+    /// <param name="id">Index of the element to shift back.</param>
+    public static void ShiftToLast<T>(ref T[] arr, int id) {
+        T tmp = arr[id];
+        // Shift all elements after the target element back by one index
+        for(int i = id + 1; i < arr.Length; i++) {
+            arr[i - 1] = arr[i];
+        }
+        // Put the target element to the last index
+        arr[arr.Length - 1] = tmp;
+    }
 }

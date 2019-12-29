@@ -44,7 +44,7 @@ public abstract class AIGenericPerceptor : MonoBehaviour {
 			result[i] = GetCardProbabilityInDeck(i);
 			sum += result[i];
 		}
-		Debug.AssertFormat(sum <= 0 || Mathf.Abs(1f - sum) < 0.001f, "{0}: Deck card probabilities don't sum up to 1! ({1})", MyController, sum);
+		Debug.AssertFormat(sum <= 0 || AIUtil.Approx(sum, 1f) || MyController.Game.Deck.CountCardsLeft < 1, "{0}: Deck card probabilities don't sum up to 1! ({1})", MyController, sum);
 		return result;
 	}
 
@@ -59,7 +59,7 @@ public abstract class AIGenericPerceptor : MonoBehaviour {
 				result[i] = GetCardProbabilityInHand(Player, i);
 				sum += result[i];
 			}
-			Debug.AssertFormat(sum <= 0 || Mathf.Abs(1f - sum) < 0.001f, "{0}: Hand card probabilities of {2} don't sum up to 1! ({1})", MyController, sum, Player);
+			Debug.AssertFormat(sum <= 0 || AIUtil.Approx(sum, 1f), "{0}: Hand card probabilities of {2} don't sum up to 1! ({1})", MyController, sum, Player);
 		}
 		return result;
 	}
