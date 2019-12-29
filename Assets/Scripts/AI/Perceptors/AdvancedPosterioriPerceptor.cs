@@ -283,12 +283,12 @@ public class AdvancedPosterioriPerceptor : PosterioriPerceptor {
 		}
 	}
 
-	// When we know that the current player has had the same hand as another,
-	// and there exists a possibility that he has just played that card,
-	// we must assume that their hands are NOT the same anymore
-	protected override void FilterWhenPlayingFromHand(int PlayerIndex) {
-		ClearSameHands(PlayerIndex);
-	}
+    protected override void FilterHiddenHandWithPlayedCard(int PlayerIndex, int PlayedCardValue) {
+        base.FilterHiddenHandWithPlayedCard(PlayerIndex, PlayedCardValue);
+        // This is not exactly accurate, since you should only clear same hands when you know for sure
+        // that the player played the card from deck, but it's too much of a hassle to get that variable.
+        ClearSameHands(PlayerIndex);
+    }
 
 	// If a Prince had been played against someone other than me and they weren't knocked out,
 	// we need to update the deck distribution in a specific manner and copy it over the target's hand

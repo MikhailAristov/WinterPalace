@@ -205,7 +205,7 @@ public abstract class PosterioriPerceptor : AIGenericPerceptor {
 	}
 
 	// Filters the hand distribution of another player using the knowlege of the card they've just played
-	protected void FilterHiddenHandWithPlayedCard(int PlayerIndex, int PlayedCardValue) {
+	protected virtual void FilterHiddenHandWithPlayedCard(int PlayerIndex, int PlayedCardValue) {
 		// Calculate the likelihoods that the player immediately played the card they just drew,
 		// or that they played the current hand from their hand
 		float probPlayFromDECK = 0, probPlayFromHAND = 0;
@@ -223,13 +223,7 @@ public abstract class PosterioriPerceptor : AIGenericPerceptor {
 		}
 		// Renormalize the array if necessary
 		RenormalizeCardDistribution(ref HandDistribution[PlayerIndex], PlayerIndex);
-		// Call the subroutine for additional updates
-		if(probPlayFromHAND > 0) {
-			FilterWhenPlayingFromHand(PlayerIndex);
-		}
 	}
-
-	protected abstract void FilterWhenPlayingFromHand(int PlayerIndex);
 
 	// If we know for sure that a hidden hand does not contain a certain card value,
 	// we set that value's probability to 0 and renormalize the hand distribution
