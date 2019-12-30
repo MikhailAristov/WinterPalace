@@ -1865,13 +1865,13 @@ MonoBehaviour:
   CurrentGameSeed: 0
   Players:
   - {fileID: 1162800742}
-  - {fileID: 1835172622}
   - {fileID: 1672981239}
+  - {fileID: 1835172622}
   - {fileID: 1855239284}
   Perceptors:
   - {fileID: 1162800746}
-  - {fileID: 669351620}
   - {fileID: 624557006}
+  - {fileID: 669351620}
   - {fileID: 925686621}
 --- !u!1001 &1426698177
 Prefab:
