@@ -202,6 +202,9 @@ public class ExtendedPosterioriPerceptor : PosterioriPerceptor {
 
         // Copy the arrays from the knowledge base to the ones inherited from the superclass, just for consistency
         KNOW.MirrorCurrentBeliefs(ref HandDistribution, ref DeckDistribution);
+        if(FullLogging) {
+            displayCurrentBeliefs();
+        }
 
         // Finally, finish the update and return
         NextTurnToAnalyze = id + 1;
