@@ -161,7 +161,7 @@ public class KnowledgeState {
         Debug.Assert(Turn != null);
         Debug.Assert(Turn.Player.SittingOrder != MySittingOrder);
         // When analyzing another player's turn, filter their hand first:
-        FilterHiddenHandWithPlayedCard(Turn.Player.SittingOrder, Turn.Card.Value);
+        FilterHiddenHand(Turn);
         // The card they just played lands on the discard pile, so update the unaccounted-for list
         AccountForCard(Turn.Card.Value);
         // Also update this player's stats
@@ -175,13 +175,10 @@ public class KnowledgeState {
 
     // During the basic opponent turn update, we need to update the joint probability distribution
     // using just the information about which card he has just played
-    protected void FilterHiddenHandWithPlayedCard(int OpponentSittingOrder, int CardValue) {
-        Debug.Assert(OpponentSittingOrder != MySittingOrder);
-        Debug.Assert(!PlayerIsKnockedOut[OpponentSittingOrder]);
-        Debug.Assert(CardValue >= CardController.VALUE_GUARD && CardValue <= CardController.VALUE_PRINCESS);
-        // Find the card's and the player's hidden hand index
-        int CardIndex = CardValue - 1;
-        int PlayerIndex = GetHiddenHandIndex(OpponentSittingOrder);
+    protected void FilterHiddenHand(MoveData TurnData) {
+        Debug.Assert(TurnData.Player.SittingOrder != MySittingOrder);
+        Debug.Assert(!PlayerIsKnockedOut[TurnData.Player.SittingOrder]);
+        Debug.Assert(TurnData.Card.Value >= CardController.VALUE_GUARD && TurnData.Card.Value <= CardController.VALUE_PRINCESS);
         // Update the hand distribution matrices
         if(CurrentOpponentCount == 3) {
             // Prepare a temporary array
@@ -190,7 +187,7 @@ public class KnowledgeState {
             for(int h0 = 0; h0 < CARD_VECTOR_LENGTH; h0++) {
                 for(int h1 = 0; h1 < CARD_VECTOR_LENGTH; h1++) {
                     for(int h2 = 0; h2 < CARD_VECTOR_LENGTH; h2++) {
-                        UpdatePartialHandDistribution(PlayerIndex, h0, h1, h2, CardIndex, ref tempArray3D);
+                        UpdatePartialHandDistribution(TurnData, h0, h1, h2, ref tempArray3D);
                     }
                 }
             }
@@ -203,7 +200,7 @@ public class KnowledgeState {
             // Loop through all possible world states and update the tempoprary array accordingly
             for(int h0 = 0; h0 < CARD_VECTOR_LENGTH; h0++) {
                 for(int h1 = 0; h1 < CARD_VECTOR_LENGTH; h1++) {
-                    UpdatePartialHandDistribution(PlayerIndex, h0, h1, CardIndex, ref tempArray2D);
+                    UpdatePartialHandDistribution(TurnData, h0, h1, ref tempArray2D);
                 }
             }
             // Renormalize the temporary array and write it back to the two-player distribution
@@ -214,7 +211,7 @@ public class KnowledgeState {
             tempArray1D.Clear();
             // Loop through all possible world states and update the tempoprary array accordingly
             for(int h0 = 0; h0 < CARD_VECTOR_LENGTH; h0++) {
-                UpdatePartialHandDistribution(PlayerIndex, h0, CardIndex, ref tempArray1D);
+                UpdatePartialHandDistribution(TurnData.Card.Value - 1, h0, ref tempArray1D);
             }
             // Renormalize the temporary array and write it back to the one-payer distribution
             tempArray1D.Renormalize();
@@ -228,11 +225,10 @@ public class KnowledgeState {
     /// Computes a partial hand distribution of the specified player,
     /// for an assumed world state and the observation of which card they played.
     /// </summary>
-    /// <param name="PlayerIndex">Index of the player for whom the computation is performed.</param>
-    /// <param name="HandIndix">The index of the card that the other player is assumed to have in their hand.</param>
-    /// <param name="PlayedCardIndex">The observed index of the card that the player played this turn.</param>
+    /// <param name="PlayedCardIndex">The index of the card that was played by the opponent.</param>
+    /// <param name="HandIndex">The index of the card that the other player is assumed to have in their hand.</param>
     /// <param name="OutDistribution">A reference to a probability distribution that containts return values.</param>
-    protected void UpdatePartialHandDistribution(int PlayerIndex, int PlayerHand, int PlayedCardIndex, ref Distribution1D OutDistribution) {
+    protected void UpdatePartialHandDistribution(int PlayedCardIndex, int PlayerHand, ref Distribution1D OutDistribution) {
         // Don't continue if priori probability is zero
         float PrioriProbability = SingleOpponentHandDistribution[PlayerHand];
         if(PrioriProbability <= 0) {
@@ -262,12 +258,11 @@ public class KnowledgeState {
     /// Computes a partial hand distribution of the specified player,
     /// for an assumed world state and the observation of which card they played.
     /// </summary>
-    /// <param name="PlayerIndex">Index of the player for whom the computation is performed.</param>
+    /// <param name="TurnData">Complete data of the turn being analyzed.</param>
     /// <param name="Hand0">The index of the card the first of the two remaining opponents is asssumed to hold.</param>
     /// <param name="Hand1">The index of the card the second of the two remaining opponents is asssumed to hold.</param>
-    /// <param name="PlayedCardIndex">The observed index of the card that the player played this turn.</param>
     /// <param name="OutDistribution">A reference to a probability distribution that containts return values.</param>
-    protected void UpdatePartialHandDistribution(int PlayerIndex, int Hand0, int Hand1, int PlayedCardIndex, ref Distribution2D OutDistribution) {
+    protected void UpdatePartialHandDistribution(MoveData TurnData, int Hand0, int Hand1, ref Distribution2D OutDistribution) {
         // Don't continue if priori probability is zero
         float PrioriProbability = TwoOpponentsHandsDistribution[Hand0, Hand1];
         if(PrioriProbability <= 0) {
@@ -278,9 +273,14 @@ public class KnowledgeState {
         if(--virtualRemainingCards[Hand0] < 0 || --virtualRemainingCards[Hand1] < 0) {
             return; // If a counter goes below zero, this is an impossible case, so return without an update
         }
+        // Parse the turn data
+        int PlayerIndex = GetHiddenHandIndex(TurnData.Player.SittingOrder),
+            PlayedCardIndex = TurnData.Card.Value - 1,
+            TargetIndex = (TurnData.Target == null || TurnData.Target.SittingOrder == MySittingOrder) ? -1 : GetHiddenHandIndex(TurnData.Target.SittingOrder);
         // Determine which card in the current data belongs to PlayerIndex
         int[] idx = new int[] { Hand0, Hand1 };
-        int playerHand = idx[PlayerIndex];
+        int playerHand = idx[PlayerIndex],
+            targetHand = TargetIndex != -1 ? idx[TargetIndex] : -1;
         // Prepare computation
         int remainingDeckSize = AIUtil.SumUpArray(virtualRemainingCards);
         Debug.Assert(remainingDeckSize > 0);
@@ -293,7 +293,7 @@ public class KnowledgeState {
                 idx[PlayerIndex] = otherCard;
                 // Calculate the joint probability of such play and increment the output array
                 OutDistribution[idx[0], idx[1]] += PrioriProbability * virtualRemainingCards[dc] / remainingDeckSize
-                                                 * PosterioriPerceptor.LikelihoodOfPlay[PlayedCardIndex + 1, otherCard + 1];
+                                                 * GetLikelihoodOfPlay(TurnData, otherCard + 1, targetHand + 1);
             }
         }
     }
@@ -302,13 +302,12 @@ public class KnowledgeState {
     /// Computes a partial hand distribution of the specified player,
     /// for an assumed world state and the observation of which card they played.
     /// </summary>
-    /// <param name="PlayerIndex">Index of the player for whom the computation is performed.</param>
+    /// <param name="TurnData">Complete data of the turn being analyzed.</param>
     /// <param name="Hand0">The index of the card the first of the three remaining opponents is asssumed to hold.</param>
     /// <param name="Hand1">The index of the card the second of the three remaining opponents is asssumed to hold.</param>
     /// <param name="Hand2">The index of the card the third of the three remaining opponents is asssumed to hold.</param>
-    /// <param name="PlayedCardIndex">The observed index of the card that the player played this turn.</param>
     /// <param name="OutDistribution">A reference to a probability distribution that containts return values.</param>
-    protected void UpdatePartialHandDistribution(int PlayerIndex, int Hand0, int Hand1, int Hand2, int PlayedCardIndex, ref Distribution3D OutDistribution) {
+    protected void UpdatePartialHandDistribution(MoveData TurnData, int Hand0, int Hand1, int Hand2, ref Distribution3D OutDistribution) {
         // Don't continue if priori probability is zero
         float PrioriProbability = ThreeOpponentsHandsDistribution[Hand0, Hand1, Hand2];
         if(PrioriProbability <= 0) {
@@ -319,9 +318,14 @@ public class KnowledgeState {
         if(--virtualRemainingCards[Hand0] < 0 || --virtualRemainingCards[Hand1] < 0 || --virtualRemainingCards[Hand2] < 0) {
             return; // If a counter goes below zero, this is an impossible case, so return without an update
         }
+        // Parse the turn data
+        int PlayerIndex = GetHiddenHandIndex(TurnData.Player.SittingOrder),
+            PlayedCardIndex = TurnData.Card.Value - 1,
+            TargetIndex = (TurnData.Target == null || TurnData.Target.SittingOrder == MySittingOrder) ? -1 : GetHiddenHandIndex(TurnData.Target.SittingOrder);
         // Determine which card in the current data belongs to PlayerIndex
         int[] idx = new int[] { Hand0, Hand1, Hand2 };
-        int playerHand = idx[PlayerIndex];
+        int playerHand = idx[PlayerIndex],
+            targetHand = TargetIndex != -1 ? idx[TargetIndex] : -1;
         // Prepare computation
         int remainingDeckSize = AIUtil.SumUpArray(virtualRemainingCards);
         Debug.Assert(remainingDeckSize > 0);
@@ -334,9 +338,46 @@ public class KnowledgeState {
                 idx[PlayerIndex] = otherCard;
                 // Calculate the joint probability of such play and increment the output array
                 OutDistribution[idx[0], idx[1], idx[2]] += PrioriProbability * virtualRemainingCards[dc] / remainingDeckSize
-                                                         * PosterioriPerceptor.LikelihoodOfPlay[PlayedCardIndex + 1, otherCard + 1];
+                                                         * GetLikelihoodOfPlay(TurnData, otherCard + 1, targetHand + 1);
             }
         }
+    }
+
+    /// <summary>
+    /// Assuming an intelligent opponent using utility-based reasoning, attempts to estimate the likelihood
+    /// of the given play for the assumed hidden hands (of the player and their target, if any).
+    /// </summary>
+    /// <param name="TurnData">The data of the turn being analyzed.</param>
+    /// <param name="OtherCardValue">The assumed value of the card the player kept in their hand.</param>
+    /// <param name="TargetCardValue">The assumed value of the card their target (if any) has in their hand.</param>
+    /// <returns>The likelihood of the given move under aforementioned assumptions.</returns>
+    private float GetLikelihoodOfPlay(MoveData TurnData, int OtherCardValue, int TargetCardValue) {
+        float result = PosterioriPerceptor.LikelihoodOfPlay[TurnData.Card.Value, OtherCardValue];
+        switch(TurnData.Card.Value) {
+            case CardController.VALUE_GUARD:
+                // Boost likelihood if targeting the correct card, decrease it otherwise.
+                result *= TurnData.TargetHandGuess == TargetCardValue ? 1.5f : 0.5f;
+                break;
+            case CardController.VALUE_BARON:
+                // Boost likelihood if the target has a lower hand, decrease it otherwise
+                result *= OtherCardValue > TargetCardValue ? 1.5f : 0.5f;
+                break;
+            case CardController.VALUE_HANDMAID:
+                // Boost likelihood if the target protects a high-value card
+                result *= OtherCardValue > CardController.VALUE_HANDMAID ? 1.5f : 1f;
+                break;
+            case CardController.VALUE_KING:
+                // There is generally no good reason to play the King unless a princess is involved
+                result *= (OtherCardValue == CardController.VALUE_PRINCESS || TargetCardValue == CardController.VALUE_PRINCESS) ? 1.5f : 0.5f;
+                break;
+            case CardController.VALUE_COUNTESS:
+                // Boost the likelihood for the lower-value cards (assume bluff)
+                result *= CardController.VALUE_HANDMAID / Mathf.Clamp(OtherCardValue, CardController.VALUE_GUARD, CardController.VALUE_HANDMAID);
+                break;
+            default:
+                break;
+        }
+        return result;
     }
 
     // On a knock-out, reduce the dimension of the joint distribution array and renormalize it
