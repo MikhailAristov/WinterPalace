@@ -13,8 +13,6 @@ public class KnowledgeState {
     protected int[] HiddenHands;
 
     protected int MySittingOrder;
-    protected int MyHandValue;
-    protected int JustDrawnValue;
 
     protected int[] CountUnaccountedForCards;
     protected Distribution1D DeckDistribution;
@@ -108,8 +106,6 @@ public class KnowledgeState {
     public void SetMyHand(int Hand, int JustDrawn = 0) {
         Debug.Assert(Hand >= 0 && Hand <= CardController.VALUE_PRINCESS);
         Debug.Assert(JustDrawn >= 0 && JustDrawn <= CardController.VALUE_PRINCESS);
-        MyHandValue = Hand;
-        JustDrawnValue = JustDrawn;
         // Also update own hand distribution
         HandDistribution[MySittingOrder].Clear();
         if(Hand > 0) {
@@ -186,54 +182,161 @@ public class KnowledgeState {
         // Find the card's and the player's hidden hand index
         int CardIndex = CardValue - 1;
         int PlayerIndex = GetHiddenHandIndex(OpponentSittingOrder);
-        // Calculate the transition probabilities
-        float ProbabilityOfPlayingFromHAND = GetProbabilityOfPlayingFromHand(OpponentSittingOrder, CardValue);
-        float ProbabilityOfPlayingFromDECK = 1f - ProbabilityOfPlayingFromHAND;
-        // Update the hand distribution matrices, but only if there is any chance that the player played 
-        // from own hand -- otherwise, their hand distribution doesn't change at this point, anyway
-        if(ProbabilityOfPlayingFromHAND > 0) {
-            if(CurrentOpponentCount == 3) {
-                // Get a slice of the 3D matrix corrensponding to the player having had the played card
-                tempArray2D = ThreeOpponentsHandsDistribution.GetSlice(PlayerIndex, CardIndex);
-                // Tensor the slice with the current deck distribution
-                tempArray3D = CalculateHandsFromSliceOnDraw(tempArray2D, PlayerIndex);
-                // Merge the tensor back into the 3D matrix, using the play probabilities earlier as weights
-                ThreeOpponentsHandsDistribution.Add(tempArray3D, ProbabilityOfPlayingFromDECK, ProbabilityOfPlayingFromHAND);
-                ThreeOpponentsHandsDistribution.Renormalize();
-            } else if(CurrentOpponentCount == 2) {
-                tempArray1D = TwoOpponentsHandsDistribution.GetSlice(PlayerIndex, CardIndex);
-                tempArray2D = CalculateHandsFromSliceOnDraw(tempArray1D, PlayerIndex);
-                TwoOpponentsHandsDistribution.Add(tempArray2D, ProbabilityOfPlayingFromDECK, ProbabilityOfPlayingFromHAND);
-                TwoOpponentsHandsDistribution.Renormalize();
-            } else if(CurrentOpponentCount == 1) {
-                tempArray1D = CalculateHandsFromSliceOnDraw();
-                SingleOpponentHandDistribution.Add(tempArray1D, ProbabilityOfPlayingFromDECK, ProbabilityOfPlayingFromHAND);
-                SingleOpponentHandDistribution.Renormalize();
+        // Update the hand distribution matrices
+        if(CurrentOpponentCount == 3) {
+            // Prepare a temporary array
+            tempArray3D.Clear();
+            // Loop through all possible world states and update the tempoprary array accordingly
+            for(int h0 = 0; h0 < CARD_VECTOR_LENGTH; h0++) {
+                for(int h1 = 0; h1 < CARD_VECTOR_LENGTH; h1++) {
+                    for(int h2 = 0; h2 < CARD_VECTOR_LENGTH; h2++) {
+                        UpdatePartialHandDistribution(PlayerIndex, h0, h1, h2, CardIndex, ref tempArray3D);
+                    }
+                }
             }
+            // Renormalize the temporary array and write it back to the three-player distribution
+            tempArray3D.Renormalize();
+            ThreeOpponentsHandsDistribution.CopyFrom(tempArray3D);
+        } else if(CurrentOpponentCount == 2) {
+            // Prepare a temporary array
+            tempArray2D.Clear();
+            // Loop through all possible world states and update the tempoprary array accordingly
+            for(int h0 = 0; h0 < CARD_VECTOR_LENGTH; h0++) {
+                for(int h1 = 0; h1 < CARD_VECTOR_LENGTH; h1++) {
+                    UpdatePartialHandDistribution(PlayerIndex, h0, h1, CardIndex, ref tempArray2D);
+                }
+            }
+            // Renormalize the temporary array and write it back to the two-player distribution
+            tempArray2D.Renormalize();
+            TwoOpponentsHandsDistribution.CopyFrom(tempArray2D);
+        } else if(CurrentOpponentCount == 1) {
+            // Prepare a temporary array
+            tempArray1D.Clear();
+            // Loop through all possible world states and update the tempoprary array accordingly
+            for(int h0 = 0; h0 < CARD_VECTOR_LENGTH; h0++) {
+                UpdatePartialHandDistribution(PlayerIndex, h0, CardIndex, ref tempArray1D);
+            }
+            // Renormalize the temporary array and write it back to the one-payer distribution
+            tempArray1D.Renormalize();
+            SingleOpponentHandDistribution.CopyFrom(tempArray1D);
         }
         // Finally, recalculate utility arrays
         RecalculateHandAndDeckdistributions();
     }
 
-    // Using the empiric values from PosterioriPerceptor.LikelihoodOfPlay, as well as the current hand and deck distribution,
-    // return the probability (not likelihood!) that the player played the hand he played from hand, rather than from deck
-    protected float GetProbabilityOfPlayingFromHand(int OpponentSittingOrder, int CardValue) {
-        Debug.Assert(OpponentSittingOrder != MySittingOrder);
-        Debug.Assert(CardValue >= CardController.VALUE_GUARD && CardValue <= CardController.VALUE_PRINCESS);
-        int PlayedCardIndex = CardValue - 1;
-        // Calculate the likelihoods that the player immediately played the card they just drew,
-        // or that they played the current hand from their hand
-        float probPlayFromDECK = 0, probPlayFromHAND = 0;
-        for(int otherCardIndex = 0; otherCardIndex < CARD_VECTOR_LENGTH; otherCardIndex++) {
-            probPlayFromDECK += PosterioriPerceptor.LikelihoodOfPlay[CardValue, otherCardIndex + 1] * HandDistribution[OpponentSittingOrder][otherCardIndex];
-            probPlayFromHAND += PosterioriPerceptor.LikelihoodOfPlay[CardValue, otherCardIndex + 1] * DeckDistribution[otherCardIndex];
+    /// <summary>
+    /// Computes a partial hand distribution of the specified player,
+    /// for an assumed world state and the observation of which card they played.
+    /// </summary>
+    /// <param name="PlayerIndex">Index of the player for whom the computation is performed.</param>
+    /// <param name="HandIndix">The index of the card that the other player is assumed to have in their hand.</param>
+    /// <param name="PlayedCardIndex">The observed index of the card that the player played this turn.</param>
+    /// <param name="OutDistribution">A reference to a probability distribution that containts return values.</param>
+    protected void UpdatePartialHandDistribution(int PlayerIndex, int PlayerHand, int PlayedCardIndex, ref Distribution1D OutDistribution) {
+        // Don't continue if priori probability is zero
+        float PrioriProbability = SingleOpponentHandDistribution[PlayerHand];
+        if(PrioriProbability <= 0) {
+            return;
         }
-        // Multiply each likelihood by the probability of each the played card being, respectively, in the deck, or in the hand
-        // It's OK if they don't sum up to 1: we will renormalize everything together at the end
-        probPlayFromDECK *= DeckDistribution[PlayedCardIndex];
-        probPlayFromHAND *= HandDistribution[OpponentSittingOrder][PlayedCardIndex];
-        // Normalize and return the probability
-        return probPlayFromHAND / (probPlayFromHAND + probPlayFromDECK);
+        // Make a copy of the unaccounted card counters and update it with the "virtually" accounted-for cards
+        Array.Copy(CountUnaccountedForCards, 1, virtualRemainingCards, 0, CARD_VECTOR_LENGTH);
+        if(--virtualRemainingCards[PlayerHand] < 0) {
+            return; // If a counter goes below zero, this is an impossible case, so return without an update
+        }
+        // Prepare computation
+        int remainingDeckSize = AIUtil.SumUpArray(virtualRemainingCards);
+        Debug.Assert(remainingDeckSize > 0);
+        // Now loop through each deck card and see if the card that was played could have been played from hand or from deck
+        for(int dc = 0; dc < CARD_VECTOR_LENGTH; dc++) {
+            if(virtualRemainingCards[dc] > 0 && (PlayedCardIndex == PlayerHand || PlayedCardIndex == dc)) {
+                // Compute which card the player has left in their hand, given PlayedCardIndex
+                int otherCard = (PlayedCardIndex == PlayerHand) ? dc : PlayerHand;
+                // Calculate the joint probability of such play
+                OutDistribution[otherCard] += PrioriProbability * virtualRemainingCards[dc] / remainingDeckSize *
+                                              PosterioriPerceptor.LikelihoodOfPlay[PlayedCardIndex + 1, otherCard + 1];
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes a partial hand distribution of the specified player,
+    /// for an assumed world state and the observation of which card they played.
+    /// </summary>
+    /// <param name="PlayerIndex">Index of the player for whom the computation is performed.</param>
+    /// <param name="Hand0">The index of the card the first of the two remaining opponents is asssumed to hold.</param>
+    /// <param name="Hand1">The index of the card the second of the two remaining opponents is asssumed to hold.</param>
+    /// <param name="PlayedCardIndex">The observed index of the card that the player played this turn.</param>
+    /// <param name="OutDistribution">A reference to a probability distribution that containts return values.</param>
+    protected void UpdatePartialHandDistribution(int PlayerIndex, int Hand0, int Hand1, int PlayedCardIndex, ref Distribution2D OutDistribution) {
+        // Don't continue if priori probability is zero
+        float PrioriProbability = TwoOpponentsHandsDistribution[Hand0, Hand1];
+        if(PrioriProbability <= 0) {
+            return;
+        }
+        // Make a copy of the unaccounted card counters and update it with the "virtually" accounted-for cards
+        Array.Copy(CountUnaccountedForCards, 1, virtualRemainingCards, 0, CARD_VECTOR_LENGTH);
+        if(--virtualRemainingCards[Hand0] < 0 || --virtualRemainingCards[Hand1] < 0) {
+            return; // If a counter goes below zero, this is an impossible case, so return without an update
+        }
+        // Determine which card in the current data belongs to PlayerIndex
+        int[] idx = new int[] { Hand0, Hand1 };
+        int playerHand = idx[PlayerIndex];
+        // Prepare computation
+        int remainingDeckSize = AIUtil.SumUpArray(virtualRemainingCards);
+        Debug.Assert(remainingDeckSize > 0);
+        // Now loop through each deck card and see if the card that was played could have been played from hand or from deck
+        for(int dc = 0; dc < CARD_VECTOR_LENGTH; dc++) {
+            if(virtualRemainingCards[dc] > 0 && (PlayedCardIndex == playerHand || PlayedCardIndex == dc)) {
+                // Compute which card the player has left in their hand, given PlayedCardIndex
+                int otherCard = (PlayedCardIndex == playerHand) ? dc : playerHand;
+                // Prepare the index values for the update
+                idx[PlayerIndex] = otherCard;
+                // Calculate the joint probability of such play and increment the output array
+                OutDistribution[idx[0], idx[1]] += PrioriProbability * virtualRemainingCards[dc] / remainingDeckSize
+                                                 * PosterioriPerceptor.LikelihoodOfPlay[PlayedCardIndex + 1, otherCard + 1];
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes a partial hand distribution of the specified player,
+    /// for an assumed world state and the observation of which card they played.
+    /// </summary>
+    /// <param name="PlayerIndex">Index of the player for whom the computation is performed.</param>
+    /// <param name="Hand0">The index of the card the first of the three remaining opponents is asssumed to hold.</param>
+    /// <param name="Hand1">The index of the card the second of the three remaining opponents is asssumed to hold.</param>
+    /// <param name="Hand2">The index of the card the third of the three remaining opponents is asssumed to hold.</param>
+    /// <param name="PlayedCardIndex">The observed index of the card that the player played this turn.</param>
+    /// <param name="OutDistribution">A reference to a probability distribution that containts return values.</param>
+    protected void UpdatePartialHandDistribution(int PlayerIndex, int Hand0, int Hand1, int Hand2, int PlayedCardIndex, ref Distribution3D OutDistribution) {
+        // Don't continue if priori probability is zero
+        float PrioriProbability = ThreeOpponentsHandsDistribution[Hand0, Hand1, Hand2];
+        if(PrioriProbability <= 0) {
+            return;
+        }
+        // Make a copy of the unaccounted card counters and update it with the "virtually" accounted-for cards
+        Array.Copy(CountUnaccountedForCards, 1, virtualRemainingCards, 0, CARD_VECTOR_LENGTH);
+        if(--virtualRemainingCards[Hand0] < 0 || --virtualRemainingCards[Hand1] < 0 || --virtualRemainingCards[Hand2] < 0) {
+            return; // If a counter goes below zero, this is an impossible case, so return without an update
+        }
+        // Determine which card in the current data belongs to PlayerIndex
+        int[] idx = new int[] { Hand0, Hand1, Hand2 };
+        int playerHand = idx[PlayerIndex];
+        // Prepare computation
+        int remainingDeckSize = AIUtil.SumUpArray(virtualRemainingCards);
+        Debug.Assert(remainingDeckSize > 0);
+        // Now loop through each deck card and see if the card that was played could have been played from hand or from deck
+        for(int dc = 0; dc < CARD_VECTOR_LENGTH; dc++) {
+            if(virtualRemainingCards[dc] > 0 && (PlayedCardIndex == playerHand || PlayedCardIndex == dc)) {
+                // Compute which card the player has left in their hand, given PlayedCardIndex
+                int otherCard = (PlayedCardIndex == playerHand) ? dc : playerHand;
+                // Prepare the index values for the update
+                idx[PlayerIndex] = otherCard;
+                // Calculate the joint probability of such play and increment the output array
+                OutDistribution[idx[0], idx[1], idx[2]] += PrioriProbability * virtualRemainingCards[dc] / remainingDeckSize
+                                                         * PosterioriPerceptor.LikelihoodOfPlay[PlayedCardIndex + 1, otherCard + 1];
+            }
+        }
     }
 
     // On a knock-out, reduce the dimension of the joint distribution array and renormalize it
@@ -326,19 +429,126 @@ public class KnowledgeState {
         Debug.Assert(DiscardedHandValue >= CardController.VALUE_GUARD && DiscardedHandValue <= CardController.VALUE_PRINCESS);
         int CardIndex = DiscardedHandValue - 1;
         int HiddenHandIndex = GetHiddenHandIndex(TargetSittingOrder);
+        // Update the appropriate matrices
+        if(CurrentOpponentCount == 3) {
+            // Prepare a temporary array
+            tempArray3D.Clear();
+            // Loop through all possible world states and update the tempoprary array accordingly
+            for(int h0 = 0; h0 < CARD_VECTOR_LENGTH; h0++) {
+                for(int h1 = 0; h1 < CARD_VECTOR_LENGTH; h1++) {
+                    for(int h2 = 0; h2 < CARD_VECTOR_LENGTH; h2++) {
+                        PrinceDiscardAndDrawPartialUpdate(HiddenHandIndex, h0, h1, h2, CardIndex, ref tempArray3D);
+                    }
+                }
+            }
+            // Renormalize the temporary array and write it back to the three-player distribution
+            tempArray3D.Renormalize();
+            ThreeOpponentsHandsDistribution.CopyFrom(tempArray3D);
+        } else if(CurrentOpponentCount == 2) {
+            // Prepare a temporary array
+            tempArray2D.Clear();
+            // Loop through all possible world states and update the tempoprary array accordingly
+            for(int h0 = 0; h0 < CARD_VECTOR_LENGTH; h0++) {
+                for(int h1 = 0; h1 < CARD_VECTOR_LENGTH; h1++) {
+                    PrinceDiscardAndDrawPartialUpdate(HiddenHandIndex, h0, h1, CardIndex, ref tempArray2D);
+                }
+            }
+            // Renormalize the temporary array and write it back to the two-player distribution
+            tempArray2D.Renormalize();
+            TwoOpponentsHandsDistribution.CopyFrom(tempArray2D);
+        } else if(CurrentOpponentCount == 1) {
+            // Just copy and renormalize the unaccounted-for card counts
+            for(int h0 = 0; h0 < CARD_VECTOR_LENGTH; h0++) {
+                SingleOpponentHandDistribution[h0] = CountUnaccountedForCards[h0 + 1] - (h0 == CardIndex ? 1 : 0);
+            }
+            SingleOpponentHandDistribution.Renormalize();
+        }
         // Account for the discarded card
         AccountForCard(DiscardedHandValue);
-        // Then, update the appropriate matrices
-        if(CurrentOpponentCount == 3) {
-            // Get a slice of the 3D matrix corrensponding to the player having had the played card
-            tempArray2D = ThreeOpponentsHandsDistribution.GetSlice(HiddenHandIndex, CardIndex);
-            // Tensor the slice with the current deck distribution back into ThreeOpponentsHandsDistribution
-            ThreeOpponentsHandsDistribution = CalculateHandsFromSliceOnDraw(tempArray2D, HiddenHandIndex);
-        } else if(CurrentOpponentCount == 2) {
-            tempArray1D = TwoOpponentsHandsDistribution.GetSlice(HiddenHandIndex, CardIndex);
-            TwoOpponentsHandsDistribution = CalculateHandsFromSliceOnDraw(tempArray1D, HiddenHandIndex);
-        } else if(CurrentOpponentCount == 1) {
-            SingleOpponentHandDistribution = CalculateHandsFromSliceOnDraw();
+    }
+
+    /// <summary>
+    /// Computes a partial hand distribution of the specified player's new hand after being targeted by the Prince,
+    /// for an assumed world state and the observation of which card they previously discarded.
+    /// </summary>
+    /// <param name="PlayerIndex">Index of the player for whom the computation is performed.</param>
+    /// <param name="Hand0">The index of the card the first of the two remaining opponents is asssumed to hold.</param>
+    /// <param name="Hand1">The index of the card the second of the two remaining opponents is asssumed to hold.</param>
+    /// <param name="DiscardedIndex">The observed index of the card that the player had discarded.</param>
+    /// <param name="OutDistribution">A reference to a probability distribution that containts return values.</param>
+    protected void PrinceDiscardAndDrawPartialUpdate(int PlayerIndex, int Hand0, int Hand1, int DiscardedIndex, ref Distribution2D OutDistribution) {
+        // Don't continue if priori probability is zero
+        float PrioriProbability = TwoOpponentsHandsDistribution[Hand0, Hand1];
+        if(PrioriProbability <= 0) {
+            return;
+        }
+        // Determine which card in the current data belongs to PlayerIndex
+        int[] idx = new int[] { Hand0, Hand1 };
+        int playerHand = idx[PlayerIndex];
+        if(playerHand != DiscardedIndex) {
+            return;
+        }
+        // Make a copy of the unaccounted card counters and update it with the "virtually" accounted-for cards
+        Array.Copy(CountUnaccountedForCards, 1, virtualRemainingCards, 0, CARD_VECTOR_LENGTH);
+        if(--virtualRemainingCards[Hand0] < 0 || --virtualRemainingCards[Hand1] < 0) {
+            return; // If a counter goes below zero, this is an impossible case, so return without an update
+        }
+        // Prepare computation
+        int remainingDeckSize = AIUtil.SumUpArray(virtualRemainingCards);
+        if(remainingDeckSize < 1) {
+            return; // The game is over, anyway.
+        }
+        Debug.Assert(remainingDeckSize > 0);
+        // Now loop through each deck card and see if the card that was played could have been played from hand or from deck
+        for(int dc = 0; dc < CARD_VECTOR_LENGTH; dc++) {
+            if(virtualRemainingCards[dc] > 0) {
+                // Calculate the joint probability of such play and increment the output array
+                idx[PlayerIndex] = dc;
+                OutDistribution[idx[0], idx[1]] += PrioriProbability * virtualRemainingCards[dc] / remainingDeckSize;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Computes a partial hand distribution of the specified player's new hand after being targeted by the Prince,
+    /// for an assumed world state and the observation of which card they previously discarded.
+    /// </summary>
+    /// <param name="PlayerIndex">Index of the player for whom the computation is performed.</param>
+    /// <param name="Hand0">The index of the card the first of the three remaining opponents is asssumed to hold.</param>
+    /// <param name="Hand1">The index of the card the second of the three remaining opponents is asssumed to hold.</param>
+    /// <param name="Hand2">The index of the card the third of the three remaining opponents is asssumed to hold.</param>
+    /// <param name="DiscardedIndex">The observed index of the card that the player had discarded.</param>
+    /// <param name="OutDistribution">A reference to a probability distribution that containts return values.</param>
+    protected void PrinceDiscardAndDrawPartialUpdate(int PlayerIndex, int Hand0, int Hand1, int Hand2, int DiscardedIndex, ref Distribution3D OutDistribution) {
+        // Don't continue if priori probability is zero
+        float PrioriProbability = ThreeOpponentsHandsDistribution[Hand0, Hand1, Hand2];
+        if(PrioriProbability <= 0) {
+            return;
+        }
+        // Determine which card in the current data belongs to PlayerIndex
+        int[] idx = new int[] { Hand0, Hand1, Hand2 };
+        int playerHand = idx[PlayerIndex];
+        if(playerHand != DiscardedIndex) {
+            return;
+        }
+        // Make a copy of the unaccounted card counters and update it with the "virtually" accounted-for cards
+        Array.Copy(CountUnaccountedForCards, 1, virtualRemainingCards, 0, CARD_VECTOR_LENGTH);
+        if(--virtualRemainingCards[Hand0] < 0 || --virtualRemainingCards[Hand1] < 0 || --virtualRemainingCards[Hand2] < 0) {
+            return; // If a counter goes below zero, this is an impossible case, so return without an update
+        }
+        // Prepare computation
+        int remainingDeckSize = AIUtil.SumUpArray(virtualRemainingCards);
+        if(remainingDeckSize < 1) {
+            return; // The game is over, anyway.
+        }
+        Debug.Assert(remainingDeckSize > 0);
+        // Now loop through each deck card and see if the card that was played could have been played from hand or from deck
+        for(int dc = 0; dc < CARD_VECTOR_LENGTH; dc++) {
+            if(virtualRemainingCards[dc] > 0) {
+                // Calculate the joint probability of such play and increment the output array
+                idx[PlayerIndex] = dc;
+                OutDistribution[idx[0], idx[1], idx[2]] += PrioriProbability * virtualRemainingCards[dc] / remainingDeckSize;
+            }
         }
     }
 
@@ -375,13 +585,7 @@ public class KnowledgeState {
         // It is as simple as transposing the corresponding matrix
         if(CurrentOpponentCount == 3) {
             // For the 3D matrix, we need to transpose it around one of the axes, namely that not involved in the swap
-            int uninvolvedHiddenHand = -1;
-            for(int p = 0; p < PlayerCount; p++) {
-                if(p != MySittingOrder && p != PlayerSittingOrder && p != TargetSittingOrder) {
-                    uninvolvedHiddenHand = GetHiddenHandIndex(p);
-                    break;
-                }
-            }
+            int uninvolvedHiddenHand = 3 - GetHiddenHandIndex(PlayerSittingOrder) - GetHiddenHandIndex(TargetSittingOrder);
             ThreeOpponentsHandsDistribution.Transpose(uninvolvedHiddenHand);
         } else if(CurrentOpponentCount == 2) {
             TwoOpponentsHandsDistribution.Transpose();
@@ -407,116 +611,8 @@ public class KnowledgeState {
         }
     }
 
-    // In case of ONE opponent remaining,
-    // calculate his hand distribution after drawing a new card.
-    protected Distribution1D CalculateHandsFromSliceOnDraw() {
-        // Count up all the unaccounted-for cards and calculate a distribution over them
-        Distribution1D result = new Distribution1D(CARD_VECTOR_LENGTH);
-        for(int i = 0; i < CARD_VECTOR_LENGTH; i++) {
-            result[i] = CountUnaccountedForCards[i + 1];
-        }
-        result.Renormalize();
-        return result;
-    }
-
-    // In case of TWO opponents remaining,
-    // calculate the joint hands distribution after player with DrawerIndex drew a card from deck,
-    // while the other player's hand distribution is stored in OtherPlayersHand array.
-    protected Distribution2D CalculateHandsFromSliceOnDraw(Distribution1D OtherPlayersHand, int DrawerIndex) {
-        Array.Copy(CountUnaccountedForCards, 1, virtualRemainingCards, 0, CARD_VECTOR_LENGTH);
-        //AIUtil.DisplayVector("virtualRemainingCards " + MySittingOrder, virtualRemainingCards);
-        //AIUtil.DisplayVector("OtherPlayersHand" + MySittingOrder, OtherPlayersHand);
-        // Prepare virtual deck distribution
-        virtualDeckDistribution.Clear();
-        for(int h1 = 0; h1 < CARD_VECTOR_LENGTH; h1++) {
-            virtualRemainingCards[h1] -= 1;
-            CumulativeUpdateDeckDistribution(OtherPlayersHand[h1], virtualRemainingCards, ref virtualDeckDistribution);
-            virtualRemainingCards[h1] += 1;
-            //AIUtil.DisplayVector("virtualDeckDistribution " + MySittingOrder, virtualDeckDistribution);
-        }
-        virtualDeckDistribution.Renormalize();
-        // Build the output from tensor of the slice and the virtual deck distribution
-        Distribution2D result = OtherPlayersHand.GetTensorProduct(virtualDeckDistribution);
-        if(DrawerIndex == 0) {
-            result.Transpose();
-        }
-        // Lastly, renormalize the 2D distribution
-        result.Renormalize();
-        return result;
-    }
-
-    // In case of THREE opponents remaining,
-    // calculate the joint hands distribution after player with DrawerIndex drew a card from deck,
-    // while the other two players' hand distributions are stored in OtherPlayersHands array.
-    protected Distribution3D CalculateHandsFromSliceOnDraw(Distribution2D OtherPlayersHands, int DrawerIndex) {
-        Array.Copy(CountUnaccountedForCards, 1, virtualRemainingCards, 0, CARD_VECTOR_LENGTH);
-        // Prepare virtual deck distribution
-        virtualDeckDistribution.Clear();
-        for(int h1 = 0; h1 < CARD_VECTOR_LENGTH; h1++) {
-            virtualRemainingCards[h1] -= 1;
-            for(int h2 = 0; h2 < CARD_VECTOR_LENGTH; h2++) {
-                virtualRemainingCards[h2] -= 1;
-                CumulativeUpdateDeckDistribution(OtherPlayersHands[h1, h2], virtualRemainingCards, ref virtualDeckDistribution);
-                virtualRemainingCards[h2] += 1;
-            }
-            virtualRemainingCards[h1] += 1;
-        }
-        virtualDeckDistribution.Renormalize();
-        // Build the output from tensor of the slice and the virtual deck distribution
-        Distribution3D result = OtherPlayersHands.GetTensorProduct(virtualDeckDistribution);
-        // Rotate the tensor back into the proper alignment with the hidden hand indices
-        if(DrawerIndex < 2) {
-            result.Transpose(0);
-            if(DrawerIndex < 1) {
-                result.Transpose(2);
-            }
-        }
-        // Lastly, renormalize the 2D distribution
-        result.Renormalize();
-        return result;
-    }
-
-    // Calculate deck distribution with just ONE opponent remaining
-    protected void CalculateDeckDistribution(Distribution1D HiddenHandDistribution, ref int[] RemainingCards, ref Distribution1D outDeckDistribution) {
-        for(int h1 = 0; h1 < CARD_VECTOR_LENGTH; h1++) {
-            RemainingCards[h1] -= 1;
-            CumulativeUpdateDeckDistribution(HiddenHandDistribution[h1], RemainingCards, ref outDeckDistribution);
-            RemainingCards[h1] += 1;
-        }
-    }
-
-    // Calculate deck distribution with just TWO opponents remaining
-    protected void CalculateDeckDistribution(Distribution2D HiddenHandDistribution, ref int[] RemainingCards, ref Distribution1D outDeckDistribution) {
-        for(int h1 = 0; h1 < CARD_VECTOR_LENGTH; h1++) {
-            RemainingCards[h1] -= 1;
-            for(int h2 = 0; h2 < CARD_VECTOR_LENGTH; h2++) {
-                RemainingCards[h2] -= 1;
-                CumulativeUpdateDeckDistribution(HiddenHandDistribution[h1, h2], RemainingCards, ref outDeckDistribution);
-                RemainingCards[h2] += 1;
-            }
-            RemainingCards[h1] += 1;
-        }
-    }
-
-    // Calculate deck distribution with all THREE players remaining
-    protected void CalculateDeckDistribution(Distribution3D HiddenHandDistribution, ref int[] RemainingCards, ref Distribution1D outDeckDistribution) {
-        for(int h1 = 0; h1 < CARD_VECTOR_LENGTH; h1++) {
-            RemainingCards[h1] -= 1;
-            for(int h2 = 0; h2 < CARD_VECTOR_LENGTH; h2++) {
-                RemainingCards[h2] -= 1;
-                for(int h3 = 0; h3 < CARD_VECTOR_LENGTH; h3++) {
-                    RemainingCards[h3] -= 1;
-                    CumulativeUpdateDeckDistribution(HiddenHandDistribution[h1, h2, h3], RemainingCards, ref outDeckDistribution);
-                    RemainingCards[h3] += 1;
-                }
-                RemainingCards[h2] += 1;
-            }
-            RemainingCards[h1] += 1;
-        }
-    }
-
     // The joint probabilities array is good for analysis, but slow for quick access,
-    // so we instead popular smaller, 1D arrays for each hand, as well as for the deck.
+    // so we instead populate smaller, 1D arrays for each hand, as well as for the deck.
     public void RecalculateHandAndDeckdistributions() {
         // The computation only works if there ARE any opponents left
         if(CurrentOpponentCount < 1) {
@@ -578,18 +674,14 @@ public class KnowledgeState {
         Debug.Assert(DeckDistributionBuffer.Length == CARD_VECTOR_LENGTH);
         if(Probability > 0) {
             int sum = AIUtil.SumUpArray(RemainingCards);
-            for(int i = 0; i < CARD_VECTOR_LENGTH; i++) {
-                DeckDistributionBuffer[i] += GetRemainingCardProb(RemainingCards[i], sum) * Probability;
+            if(sum > 0) {
+                for(int i = 0; i < CARD_VECTOR_LENGTH; i++) {
+                    if(RemainingCards[i] > 0) {
+                        DeckDistributionBuffer[i] += Probability * RemainingCards[i] / sum;
+                    }
+                }
             }
         }
-    }
-
-    // Another convenience function, for handling negative and zero-valued inputs
-    protected float GetRemainingCardProb(int RemainingCardsOfThisType, int TotalRemainingCards) {
-        if(TotalRemainingCards <= 0 || RemainingCardsOfThisType <= 0) {
-            return 0;
-        }
-        return (float)RemainingCardsOfThisType / TotalRemainingCards;
     }
 
     // Convenience function to retrieve hidden hand indices given the sitting order
