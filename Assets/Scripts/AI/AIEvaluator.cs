@@ -78,7 +78,7 @@ public class AIEvaluator : MonoBehaviour {
 		}
 
 		public override string ToString() {
-			return string.Format("{0}: deck cards MSE = {1:F3}, XEE = {2:F3} ({3} samples); adversary hands MSE = {4:F3}, XEE = {5:F3} (after {6} samples)", 
+			return string.Format("{0}: deck cards RMSE = {1:F3}, XEE = {2:F3} ({3} samples); adversary hands RMSE = {4:F3}, XEE = {5:F3} (after {6} samples)", 
 				ClassName, Mathf.Sqrt(DeckMSE), DeckXEE, DeckDataPointCount, Mathf.Sqrt(AdversaryHandMSE), AdversaryHandXEE, HandDataPointCount);
 		}
 	}
