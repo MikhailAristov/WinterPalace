@@ -579,7 +579,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 529583656}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -378.09244, y: 197.36449, z: 0}
+  m_LocalPosition: {x: -378.1182, y: 197.37898, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1452363648}
@@ -1025,6 +1025,7 @@ MonoBehaviour:
   PrincessCard: {fileID: 1617696157}
   HeartPrefab: {fileID: 1640273718115736, guid: a3246de9d72c2ee4bb68b3c808050835,
     type: 2}
+  TurboMode: 0
 --- !u!1001 &1426698177
 Prefab:
   m_ObjectHideFlags: 0
@@ -1152,7 +1153,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1452055524}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 378.09244, y: 197.36449, z: 0}
+  m_LocalPosition: {x: 378.1182, y: 197.37898, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1452363648}
@@ -1343,7 +1344,7 @@ RectTransform:
   m_GameObject: {fileID: 1452363643}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -9}
-  m_LocalScale: {x: 0.027973294, y: 0.027973294, z: 0.027973294}
+  m_LocalScale: {x: 0.027971547, y: 0.027971547, z: 0.027971547}
   m_Children:
   - {fileID: 529583657}
   - {fileID: 1452055525}

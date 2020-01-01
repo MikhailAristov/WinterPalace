@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class CardController : MonoBehaviour, IClickable {
@@ -36,10 +35,12 @@ public abstract class CardController : MonoBehaviour, IClickable {
 
 	public const float MOVEMENT_THRESHOLD = 0.1f;
 	public const float ROTATION_THRESHOLD = 1f;
-	public static float LERP_FACTOR = 2f;
+	public const float LERP_FACTOR = 2f;
 
 	protected bool isMoving;
 	protected bool isRotating;
+
+    protected static GameController Game;
 
 	public bool isInMotion {
 		get { return (isMoving || isRotating); }
@@ -48,6 +49,9 @@ public abstract class CardController : MonoBehaviour, IClickable {
 	protected void Start() {
 		isMoving = false;
 		isRotating = false;
+        if(Game == null) {
+            Game = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameController>();
+        }
 	}
 	
 	// Update is called once per frame
@@ -58,7 +62,7 @@ public abstract class CardController : MonoBehaviour, IClickable {
 		}
 		// Move the card to its destination if necessary
 		if(Vector3.Distance(transform.localPosition, TargetPosition) > MOVEMENT_THRESHOLD) {
-			transform.localPosition = Vector3.Lerp(transform.localPosition, TargetPosition, LERP_FACTOR * Time.deltaTime);
+			transform.localPosition = Game.TurboMode ? TargetPosition : Vector3.Lerp(transform.localPosition, TargetPosition, LERP_FACTOR * Time.deltaTime);
 			if(!isMoving) {
 				LiftUp();
 				isMoving = true;
@@ -70,7 +74,7 @@ public abstract class CardController : MonoBehaviour, IClickable {
 
 		// Rotate the card if necessary
 		if(Quaternion.Angle(transform.localRotation, TargetRotation) > ROTATION_THRESHOLD) {
-			transform.localRotation = Quaternion.Slerp(transform.localRotation, TargetRotation, LERP_FACTOR * Time.deltaTime);
+			transform.localRotation = Game.TurboMode ? TargetRotation : Quaternion.Slerp(transform.localRotation, TargetRotation, LERP_FACTOR * Time.deltaTime);
 			isRotating = true;
 		} else if(isRotating) {
 			isRotating = false;

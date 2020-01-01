@@ -43,6 +43,11 @@ public class GameController : MonoBehaviour {
 	public GameObject HeartPrefab;
 	private int TotalHeartCount;
 
+    /// <summary>
+    /// When checked, makes the cards teleport to target position instead of lerping there.
+    /// </summary>
+    public bool TurboMode; 
+
 	// This checks whether everyone is ready for the next game move
 	public bool EveryoneReady {
 		get {
@@ -211,7 +216,7 @@ public class GameController : MonoBehaviour {
 
 	private IEnumerator tallyUpTheFinalScore() {
 		Debug.Assert(Deck.CountCardsLeft <= 1);
-		float waitBetweenCardFlips = 0.5f;
+        float waitBetweenCardFlips = TurboMode ? 0 : 0.5f;
 		// Wait until every player is ready, just in case
 		yield return new WaitUntil(() => (EveryoneReady && AllCardsDown));
 		// Flip all the cards that are still not flipped

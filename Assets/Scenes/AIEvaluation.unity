@@ -1849,6 +1849,7 @@ MonoBehaviour:
   PrincessCard: {fileID: 1617696157}
   HeartPrefab: {fileID: 1640273718115736, guid: a3246de9d72c2ee4bb68b3c808050835,
     type: 2}
+  TurboMode: 1
 --- !u!114 &1366346733
 MonoBehaviour:
   m_ObjectHideFlags: 0

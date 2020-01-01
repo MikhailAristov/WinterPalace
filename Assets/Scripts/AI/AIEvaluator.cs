@@ -31,8 +31,6 @@ public class AIEvaluator : MonoBehaviour {
 				}
 			}
 		}
-		// Speed up the card movement
-		CardController.LERP_FACTOR = 10f;
 	}
 
 	public void NextGameSeed() {
