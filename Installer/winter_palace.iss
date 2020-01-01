@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Winter Palace"
-#define MyAppVersion "1.0.3"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "Mikhail Aristov"
 #define MyAppURL "https://github.com/MikhailAristov/WinterPalace"
 #define MyAppExeName "WinterPalace.exe"
