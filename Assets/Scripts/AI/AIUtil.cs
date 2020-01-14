@@ -108,6 +108,35 @@ public static class AIUtil {
 		return Mathf.Abs(result);
 	}
 
+    /// <summary>
+    /// Calculates the Most Likely Card (MLC) error of a given hand estimation, given the actual hand value.
+    /// 
+    /// MLC1 = 0 if the actual hand has the highest estimated probability of all possible hands, 1 otherwise;
+    /// MLC2 = 0 if the actual hand is among the two highest estimated probabilities, 1 otherwise;
+    /// MLC2 = 0 if the actual hand is among the three highest estimated probabilities, 1 otherwise;
+    /// </summary>
+    /// <param name="HandDistribution">The hand distribution estimation.</param>
+    /// <param name="ActualHandValue">The actual hand value.</param>
+    /// <returns>A Vector3 containing (MLC1, MLC2, MLC3).</returns>
+    public static Vector3 GetMostLikelyCardError(float[] HandDistribution, int ActualHandValue) {
+        Vector3 result = Vector3.one;
+        // Sort the card values by their estimated likelihood
+        int[] mostLikelyHandValues = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8 };
+        Array.Sort(HandDistribution, mostLikelyHandValues);
+        // Check the most likely card, then the second most likely, then the third
+        if(mostLikelyHandValues[8] == ActualHandValue) {
+            result = Vector3.zero;
+        } else if(mostLikelyHandValues[7] == ActualHandValue) {
+            result.y = 0;
+            result.z = 0;
+        } else if(mostLikelyHandValues[6] == ActualHandValue) {
+            result.z = 0;
+        }
+        // Reverse the sorting
+        Array.Sort(mostLikelyHandValues, HandDistribution);
+        return result;
+    }
+
 	public static void DisplayVector(string Preface, float[] Input) {
 		string output = string.Format("{0}:", Preface);
 

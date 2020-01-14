@@ -48,22 +48,16 @@ public class AIEvaluator : MonoBehaviour {
 		public float AdversaryHandMSE;
 		public float DeckXEE;
 		public float AdversaryHandXEE;
+        public Vector3 AdversaryHandMLC;
 		public int DeckDataPointCount;
 		public int DeckCardsCount;
 		public int HandDataPointCount;
 
 		public PerceptorStatistics(string name) {
 			ClassName = name;
-			DeckMSE = 0;
-			AdversaryHandMSE = 0;
-			DeckXEE = 0;
-			AdversaryHandXEE = 0;
-			DeckDataPointCount = 0;
-			DeckCardsCount = 0;
-			HandDataPointCount = 0;
 		}
 
-		public void AppendStatistics(float NextDeckMSE, float NextDeckXEE, int DeckCardsLeft, float NextHandMSE, float NextHandXEE, int HandsAnalyzed) {
+		public void AppendStatistics(float NextDeckMSE, float NextDeckXEE, int DeckCardsLeft, float NextHandMSE, float NextHandXEE, Vector3 NextHandMLC, int HandsAnalyzed) {
 			// Update deck stats
 			DeckMSE = (DeckMSE * DeckCardsCount + NextDeckMSE * DeckCardsLeft) / (DeckCardsCount + DeckCardsLeft);
 			DeckXEE = (DeckXEE * DeckDataPointCount + NextDeckXEE) / (DeckDataPointCount + 1);
@@ -72,12 +66,13 @@ public class AIEvaluator : MonoBehaviour {
 			// Update hand stats
 			AdversaryHandMSE = (AdversaryHandMSE * HandDataPointCount + NextHandMSE * HandsAnalyzed) / (HandDataPointCount + HandsAnalyzed);
 			AdversaryHandXEE = (AdversaryHandXEE * HandDataPointCount + NextHandXEE * HandsAnalyzed) / (HandDataPointCount + HandsAnalyzed);
-			HandDataPointCount += HandsAnalyzed;
+            AdversaryHandMLC = (AdversaryHandMLC * HandDataPointCount + NextHandMLC * HandsAnalyzed) / (HandDataPointCount + HandsAnalyzed);
+            HandDataPointCount += HandsAnalyzed;
 		}
 
 		public override string ToString() {
-			return string.Format("{0}: deck cards RMSE = {1:F3}, XEE = {2:F3} ({3} samples); adversary hands RMSE = {4:F3}, XEE = {5:F3} (after {6} samples)", 
-				ClassName, Mathf.Sqrt(DeckMSE), DeckXEE, DeckDataPointCount, Mathf.Sqrt(AdversaryHandMSE), AdversaryHandXEE, HandDataPointCount);
+			return string.Format("{0}: deck cards RMSE = {1:F3}, XEE = {2:F3} ({3} samples); adversary hands RMSE = {4:F3}, XEE = {5:F3}, MLC1/2/3 = {7:F3}/{8:F3}/{9:F3} (after {6} samples)", 
+				ClassName, Mathf.Sqrt(DeckMSE), DeckXEE, DeckDataPointCount, Mathf.Sqrt(AdversaryHandMSE), AdversaryHandXEE, HandDataPointCount, AdversaryHandMLC.x, AdversaryHandMLC.y, AdversaryHandMLC.z);
 		}
 	}
 
@@ -126,6 +121,7 @@ public class AIEvaluator : MonoBehaviour {
 		float nextDeckXEE = AIUtil.GetCrossEntropyError(ActualDeckDistribution, EstimatedDeckDistribution);
 		// Calculate the card adversary distribution for other players
 		float nextAdversaryHandMSE = 0, nextAdversaryHandXEE = 0;
+        Vector3 nextAdversaryHandMLC = Vector3.zero;
 		float[] ActualHandDistribution = new float[CardController.VALUE_PRINCESS + 1], EstimatedHandDistribution;
 		int countHandsChecked = 0;
 		for(int p = 0; p < Players.Length; p++) {
@@ -137,13 +133,15 @@ public class AIEvaluator : MonoBehaviour {
 				EstimatedHandDistribution = Perceptor.GetCardProbabilitiesInHand(Players[p]);
 				nextAdversaryHandMSE += AIUtil.GetMeanSquaredError(ActualHandDistribution, EstimatedHandDistribution);
 				nextAdversaryHandXEE += AIUtil.GetCrossEntropyError(ActualHandDistribution, EstimatedHandDistribution);
+                nextAdversaryHandMLC += AIUtil.GetMostLikelyCardError(EstimatedHandDistribution, Players[p].GetHand().Value);
 				countHandsChecked += 1;
 			}
 		}
 		// Update the statistics for this perceptor class
 		if(countHandsChecked > 0) {
 			nextAdversaryHandMSE /= countHandsChecked;
-			PerceptorStats[PerceptorClassNames[SittingOrder]].AppendStatistics(nextDeckMSE, nextDeckXEE, DeckCardsLeft, nextAdversaryHandMSE, nextAdversaryHandXEE, countHandsChecked);
+            nextAdversaryHandMLC /= countHandsChecked;
+            PerceptorStats[PerceptorClassNames[SittingOrder]].AppendStatistics(nextDeckMSE, nextDeckXEE, DeckCardsLeft, nextAdversaryHandMSE, nextAdversaryHandXEE, nextAdversaryHandMLC, countHandsChecked);
 		}
 	}
 
