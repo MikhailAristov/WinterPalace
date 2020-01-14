@@ -31,7 +31,7 @@ public abstract class PlayerController : MonoBehaviour {
 	protected bool waitingForCardPeek;
 
 	// Use this for initialization
-	protected void Start() {
+	protected virtual void Start() {
 		Reset();
 		HeartCount = 0;
 		// If I am flipped upside down, move the heart container to the (global) left of me, rather than the right

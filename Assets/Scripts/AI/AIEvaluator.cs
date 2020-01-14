@@ -11,7 +11,7 @@ public class AIEvaluator : MonoBehaviour {
 
 	// The order in which player controllers and their perceptors are listed below
 	// must be the same in both arrays, but does not have to match GameController.Players
-	public PlayerController[] Players;
+	public AIPlayerController[] Players;
 	public AIGenericPerceptor[] Perceptors;
 
 	protected string[] PerceptorClassNames;
@@ -84,15 +84,16 @@ public class AIEvaluator : MonoBehaviour {
 		PerceptorStats = new Dictionary<string, PerceptorStatistics>();
 		PerceptorClassNames = new string[Perceptors.Length];
 		for(int i = 0; i < Perceptors.Length; i++) {
-			if(Perceptors[i] != null) {
-				PerceptorClassNames[i] = Perceptors[i].GetType().ToString();
-				if(!PerceptorStats.ContainsKey(PerceptorClassNames[i])) {
-					PerceptorStats.Add(PerceptorClassNames[i], new PerceptorStatistics(PerceptorClassNames[i]));
-				}
-			} else {
-				PerceptorClassNames[i] = "";
-			}
-		}
+            // Find the active perceptor if necessary
+            if(Perceptors[i] == null || !Perceptors[i].isActiveAndEnabled) {
+                Perceptors[i] = Players[i].GetFirstActivePerceptor();
+            }
+            // Add the perceptor's class name to the perceptor stats table
+            PerceptorClassNames[i] = Perceptors[i].GetType().ToString();
+            if(!PerceptorStats.ContainsKey(PerceptorClassNames[i])) {
+                PerceptorStats.Add(PerceptorClassNames[i], new PerceptorStatistics(PerceptorClassNames[i]));
+            }
+        }
 	}
 
 	public void UpdateStatistics(float[] DeckDistribution, int DeckCardsLeft) {
