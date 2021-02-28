@@ -2,10 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Winter Palace"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "Mikhail Aristov"
 #define MyAppURL "https://github.com/MikhailAristov/WinterPalace"
-#define MyAppExeName "WinterPalace.exe"
+#define MyAppExeName "Winter Palace.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
@@ -62,9 +62,11 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "..\Build\game\WinterPalace.exe"; DestDir: "{app}"; Flags: ignoreversion  
-Source: "..\Build\game\UnityPlayer.dll"; DestDir: "{app}"; Flags: ignoreversion  
-Source: "..\Build\game\WinterPalace_Data\*"; DestDir: "{app}\WinterPalace_Data"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\Build\game\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion        
+Source: "..\Build\game\UnityCrashHandler32.exe"; DestDir: "{app}"; Flags: ignoreversion  
+Source: "..\Build\game\UnityPlayer.dll"; DestDir: "{app}"; Flags: ignoreversion        
+Source: "..\Build\game\{#MyAppName}_Data\*"; DestDir: "{app}\{#MyAppName}_Data"; Flags: ignoreversion recursesubdirs createallsubdirs      
+Source: "..\Build\game\MonoBleedingEdge\*"; DestDir: "{app}\MonoBleedingEdge"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\license.rtf"; DestDir: "{app}"; Flags: ignoreversion               
 Source: ".\readme.html"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
