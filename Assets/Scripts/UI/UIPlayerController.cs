@@ -143,7 +143,7 @@ public class UIPlayerController : PlayerController {
 	// and sets its values accordingly into the input variables
 	protected void RaycastCheck<T>(Vector3 screenPosition) where T:IClickable {
 		// Get ray and raycast hit
-		Ray ray = Camera.main.ScreenPointToRay(screenPosition);
+		Ray ray = CameraController.Cam.ScreenPointToRay(screenPosition);
 		RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity);
 		// Check if it hits anything
 		if(hit) {

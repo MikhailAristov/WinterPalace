@@ -16,7 +16,6 @@ public abstract class PlayerController : MonoBehaviour {
 	public Transform Hand;
 	public Transform Front;
 	public Transform HeartContainer;
-	public RectTransform SpeechOutput;
 
 	protected CardController myHand;
 	protected CardController justDrawn;
@@ -159,19 +158,14 @@ public abstract class PlayerController : MonoBehaviour {
 	protected abstract IEnumerator PickAMove();
 
 	public void Say(string text) {
-		Debug.Assert(SpeechOutput != null);
-		// Ensure the output is always rotated to match the screen
-		SpeechOutput.rotation = Quaternion.identity;
-		// Set the text contents
-		SpeechOutput.gameObject.GetComponentInChildren<UnityEngine.UI.Text>().text = text;
-		// Set the object active
-		SpeechOutput.gameObject.SetActive(true);
+        Debug.Assert(SpeechBubble.Main != null);
+        SpeechBubble.Main.Display(text, Front.position);
 	}
 
 	public void ShutUp() {
-		Debug.Assert(SpeechOutput != null);
-		SpeechOutput.gameObject.SetActive(false);
-	}
+        Debug.Assert(SpeechBubble.Main != null);
+        SpeechBubble.Main.Hide();
+    }
 
 	public void DiscardHand() {
 		Debug.LogFormat("{0} discards the {1}.", this, myHand);
